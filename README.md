@@ -27,7 +27,7 @@ Compilr solves the challenge of executing arbitrary, untrusted user code in real
 Whether you are building a competitive programming platform, an educational coding playground, or an interactive technical interview tool, Compilr provides a complete, self-hosted execution backend and a polished web workbench.
 
 ### Key Capabilities
-* **17 Supported Languages & Databases**: Out-of-the-box execution for compiled languages, interpreted scripting runtimes, and relational & document databases.
+* **14 Supported Languages & Databases**: Out-of-the-box execution for compiled languages, interpreted scripting runtimes, and relational & document databases.
 * **Dual-Layer Isolation**: Combines containerized environments (Docker) with multi-tenant Linux kernel sandboxing (**Isolate** using namespaces, cgroups, chroot, and RLIMITs).
 * **Deterministic Resource Limits**: Strict enforcement of CPU time limits, wall-clock timeouts, memory caps, file-size limits, and process limits (`pidsLimit`).
 * **Zero Host Contamination**: Untrusted user code never touches the host system; sandbox network access is disabled (`networkMode: none`) by default.
@@ -56,7 +56,7 @@ Whether you are building a competitive programming platform, an educational codi
        ├─────────────────────────────────┬────────────────────────────────┐
        ▼                                 ▼                                ▼
 [ Compiled Languages ]          [ Interpreted Languages ]         [ Database Engines ]
-(Java, C, C++, Rust, Go, C#)     (Python, Node.js, TS, Dart, PHP) (Postgres, MySQL, SQLite, Mongo)
+(Java, C, C++, Rust, Go, Kotlin) (Python, Node.js, TypeScript)    (Postgres, MySQL, SQLite, Mongo)
        │                                 │                                │
        ▼                                 ▼                                │
 [ Docker Container ]            [ Docker Container ]                      │
@@ -81,10 +81,7 @@ Whether you are building a competitive programming platform, an educational codi
 | **TypeScript** | `typescript-5.4` | TypeScript 5.4 | Interpreted | `ts-node` (Node.js 20) | `main.ts` |
 | **Go** | `go-1.22` | Go 1.22 | Compiled | `go build` | `main.go` |
 | **Rust** | `rust-1.75` | Rust 1.75 | Compiled | `rustc -O` | `main.rs` |
-| **C#** | `csharp-12` | .NET 8.0 | Compiled | `dotnet run` | `Program.cs` |
 | **Kotlin** | `kotlin-1.9` | Kotlin 1.9 | Compiled | `kotlinc` & `java` | `Main.kt` |
-| **Dart** | `dart-3.4` | Dart 3.4 | Interpreted | `dart run` | `main.dart` |
-| **PHP** | `php-8.3` | PHP 8.3 | Interpreted | `php` | `main.php` |
 | **PostgreSQL**| `postgresql-16` | PostgreSQL 16 | Database | `psql` | `main.sql` |
 | **MySQL** | `mysql-8.0` | MySQL 8.0 | Database | `mysql` | `main.sql` |
 | **SQLite** | `sqlite-3` | SQLite 3.45 | Database | `sqlite3` | `main.sql` |

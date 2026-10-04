@@ -70,28 +70,10 @@ public enum DockerImageRegistry {
             "docker/rust-1_75"
     ),
 
-    PHP_8_3(
-            "execution/php",
-            "8.3",
-            "docker/php-8_3"
-    ),
-
-    CSHARP_12(
-            "execution/csharp",
-            "12",
-            "docker/csharp-12"
-    ),
-
     KOTLIN_1_9(
             "execution/kotlin",
             "1.9",
             "docker/kotlin-1_9"
-    ),
-
-    DART_3_4(
-            "execution/dart",
-            "3.4",
-            "docker/dart-3_4"
     ),
 
     SQLITE_3(

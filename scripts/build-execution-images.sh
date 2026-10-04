@@ -2,7 +2,7 @@
 # ==============================================================================
 # Compilr - Build All Execution Sandbox Images
 #
-# Builds the 17 Docker images required by the Compilr execution engine.
+# Builds the 14 Docker images required by the Compilr execution engine.
 # Images are built in strict topological dependency order:
 #   1. execution/isolate:1.0 is built first (base sandbox).
 #   2. execution/java:21 is built before execution/kotlin:1.9.
@@ -10,6 +10,8 @@
 # ==============================================================================
 
 set -euo pipefail
+
+export DOCKER_BUILDKIT=1
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
@@ -29,11 +31,8 @@ BUILD_ORDER=(
     "execution/c:17|c-17"
     "execution/cpp:23|cpp-23"
     "execution/python:3.12|python-3_12"
-    "execution/csharp:12|csharp-12"
     "execution/go:1.22|go-1_22"
     "execution/rust:1.75|rust-1_75"
-    "execution/php:8.3|php-8_3"
-    "execution/dart:3.4|dart-3_4"
     "execution/mysql:8.0|mysql-8_0"
     "execution/postgres:16|postgres-16"
     "execution/sqlite:3|sqlite-3"

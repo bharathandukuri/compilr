@@ -1,13 +1,11 @@
 FROM execution/isolate:1.0
 
-ENV DEBIAN_FRONTEND=noninteractive
-
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends \
-        golang-go \
-    && go version \
-    && rm -rf /var/lib/apt/lists/*
+RUN apk add --no-cache go \
+    && go clean -cache -modcache \
+    && rm -rf /root/go /root/.cache
 
 WORKDIR /execution
+
+RUN go version
 
 CMD ["/bin/bash"]

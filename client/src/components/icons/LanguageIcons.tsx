@@ -9,12 +9,9 @@ import cppSvg from "devicon/icons/cplusplus/cplusplus-original.svg"
 import pythonSvg from "devicon/icons/python/python-original.svg"
 import jsSvg from "devicon/icons/javascript/javascript-original.svg"
 import tsSvg from "devicon/icons/typescript/typescript-original.svg"
-import csharpSvg from "devicon/icons/csharp/csharp-original.svg"
 import kotlinSvg from "devicon/icons/kotlin/kotlin-original.svg"
 import goSvg from "devicon/icons/go/go-original.svg"
 import rustSvg from "devicon/icons/rust/rust-original.svg"
-import dartSvg from "devicon/icons/dart/dart-original.svg"
-import phpSvg from "devicon/icons/php/php-original.svg"
 import mysqlSvg from "devicon/icons/mysql/mysql-original.svg"
 import postgresSvg from "devicon/icons/postgresql/postgresql-original.svg"
 import sqliteSvg from "devicon/icons/sqlite/sqlite-original.svg"
@@ -57,11 +54,6 @@ export const DEVICON_MAP: Record<string, DeviconDetails> = {
     svg: cSvg,
     deviconClass: "devicon-c-plain colored",
   },
-  csharp: {
-    name: "C#",
-    svg: csharpSvg,
-    deviconClass: "devicon-csharp-plain colored",
-  },
   kotlin: {
     name: "Kotlin",
     svg: kotlinSvg,
@@ -76,16 +68,6 @@ export const DEVICON_MAP: Record<string, DeviconDetails> = {
     name: "Rust",
     svg: rustSvg,
     deviconClass: "devicon-rust-plain colored",
-  },
-  dart: {
-    name: "Dart",
-    svg: dartSvg,
-    deviconClass: "devicon-dart-plain colored",
-  },
-  php: {
-    name: "PHP",
-    svg: phpSvg,
-    deviconClass: "devicon-php-plain colored",
   },
   mysql: {
     name: "MySQL",
@@ -153,17 +135,7 @@ export function resolveDevicon(language?: string | null): DeviconDetails | null 
     return DEVICON_MAP.cpp
   }
 
-  // 6. C#
-  if (
-    normalized.includes("csharp") ||
-    normalized.includes("c#") ||
-    normalized.includes("dotnet") ||
-    normalized === "cs"
-  ) {
-    return DEVICON_MAP.csharp
-  }
-
-  // 7. C
+  // 6. C
   if (normalized === "c" || normalized.startsWith("c-") || normalized === "gcc") {
     return DEVICON_MAP.c
   }
@@ -178,22 +150,12 @@ export function resolveDevicon(language?: string | null): DeviconDetails | null 
     return DEVICON_MAP.go
   }
 
-  // 10. Rust
+  // 9. Rust
   if (normalized.includes("rust") || normalized === "rs") {
     return DEVICON_MAP.rust
   }
 
-  // 11. Dart
-  if (normalized.includes("dart")) {
-    return DEVICON_MAP.dart
-  }
-
-  // 12. PHP
-  if (normalized.includes("php")) {
-    return DEVICON_MAP.php
-  }
-
-  // 13. SQLite
+  // 10. SQLite
   if (normalized.includes("sqlite") || normalized.includes("sqlite3")) {
     return DEVICON_MAP.sqlite
   }
@@ -340,15 +302,6 @@ export const GoIcon: React.FC<Omit<LanguageIconProps, "language" | "languageId">
 )
 export const RustIcon: React.FC<Omit<LanguageIconProps, "language" | "languageId">> = (props) => (
   <LanguageIcon language="rust" {...props} />
-)
-export const DartIcon: React.FC<Omit<LanguageIconProps, "language" | "languageId">> = (props) => (
-  <LanguageIcon language="dart" {...props} />
-)
-export const PhpIcon: React.FC<Omit<LanguageIconProps, "language" | "languageId">> = (props) => (
-  <LanguageIcon language="php" {...props} />
-)
-export const CsharpIcon: React.FC<Omit<LanguageIconProps, "language" | "languageId">> = (props) => (
-  <LanguageIcon language="csharp" {...props} />
 )
 export const KotlinIcon: React.FC<Omit<LanguageIconProps, "language" | "languageId">> = (props) => (
   <LanguageIcon language="kotlin" {...props} />

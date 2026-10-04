@@ -8,7 +8,7 @@ All operational automation scripts are located in the [`scripts/`](../scripts) d
 
 | Script | Purpose | When to Use |
 | :--- | :--- | :--- |
-| **[`scripts/build-execution-images.sh`](../scripts/build-execution-images.sh)** | Builds the 17 sandbox execution Docker images in topological dependency order. | Before starting standard compose, or when updating language runtime images. |
+| **[`scripts/build-execution-images.sh`](../scripts/build-execution-images.sh)** | Builds the 14 sandbox execution Docker images in topological dependency order. | Before starting standard compose, or when updating language runtime images. |
 | **[`scripts/deploy.sh`](../scripts/deploy.sh)** | Automated production deployment script for standard Docker Compose on host. | Deploying multi-container stack directly on a host or VPS without DinD. |
 | **[`scripts/run-dind.sh`](../scripts/run-dind.sh)** | Runs the All-In-One DinD container on your host with optional port and image arguments. | Fast local testing or one-command VPS deployment of the DinD container. |
 | **[`scripts/publish-dockerhub.sh`](../scripts/publish-dockerhub.sh)** | Automates building, tagging, and pushing the all-in-one image to Docker Hub. | Publishing public releases to Docker Hub for one-command distribution. |
@@ -19,7 +19,7 @@ All operational automation scripts are located in the [`scripts/`](../scripts) d
 ## Detailed Usage Examples
 
 ### 1. `scripts/build-execution-images.sh`
-Builds all 17 language execution sandbox images (Isolate, Java 21, Python 3.12, C 17, C++ 23, Node.js 20, TypeScript 5.4, Go 1.22, Rust 1.75, PHP 8.3, C# 12, Kotlin 1.9, Dart 3.4, PostgreSQL 16, MySQL 8.0, SQLite 3, MongoDB 8.0):
+Builds all 14 execution sandbox images (Isolate 1.0, Java 21, Kotlin 1.9, Node.js 20, TypeScript 5.4, Python 3.12, C 17, C++ 23, Go 1.22, Rust 1.75, PostgreSQL 16, MySQL 8.0, SQLite 3, MongoDB 8.0):
 ```bash
 ./scripts/build-execution-images.sh
 ```

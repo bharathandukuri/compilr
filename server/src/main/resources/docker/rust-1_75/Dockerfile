@@ -1,15 +1,14 @@
 FROM execution/isolate:1.0
 
-ENV DEBIAN_FRONTEND=noninteractive
-
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends \
-        rustc \
-        gcc \
-        libc6-dev \
-    && rustc --version \
-    && rm -rf /var/lib/apt/lists/*
+RUN apk add --no-cache \
+    rust \
+    cargo \
+    gcc \
+    musl-dev \
+    && rm -rf /root/.cargo/registry /root/.cargo/git
 
 WORKDIR /execution
+
+RUN rustc --version
 
 CMD ["/bin/bash"]

@@ -174,7 +174,6 @@ public class IsolateExecutionServiceImpl implements IsolateExecutionService {
         isolateCommand.add("--full-env");
         isolateCommand.add("--env=LANG=C.UTF-8");
         isolateCommand.add("--env=LC_ALL=C.UTF-8");
-        isolateCommand.add("--env=DOTNET_ROOT=/usr/lib/dotnet");
 
         isolateCommand.add("--run");
         isolateCommand.add("--");

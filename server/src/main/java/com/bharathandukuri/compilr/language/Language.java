@@ -37,10 +37,7 @@ public interface Language {
             case "typescript-5.4" -> "5.4 (Node.js 20)";
             case "go-1.22" -> "1.22";
             case "rust-1.75" -> "1.75";
-            case "php-8.3" -> "8.3";
-            case "csharp-12" -> "12 (.NET 8.0)";
             case "kotlin-1.9" -> "1.9";
-            case "dart-3.4" -> "3.4";
             case "mysql-8.0" -> "8.0";
             case "postgresql-16" -> "16";
             case "sqlite-3" -> "3.45";
@@ -59,10 +56,7 @@ public interface Language {
             case "typescript-5.4" -> List.of("typescript", "ts", "typescript-node");
             case "go-1.22" -> List.of("go", "golang");
             case "rust-1.75" -> List.of("rust", "rs");
-            case "php-8.3" -> List.of("php");
-            case "csharp-12" -> List.of("csharp", "c#", "cs", "dotnet");
             case "kotlin-1.9" -> List.of("kotlin", "kt");
-            case "dart-3.4" -> List.of("dart");
             case "mysql-8.0" -> List.of("mysql", "sql");
             case "postgresql-16" -> List.of("postgres", "postgresql", "psql");
             case "sqlite-3" -> List.of("sqlite", "sqlite3");
@@ -152,27 +146,9 @@ public interface Language {
                     println!("Hello, World!");
                 }
                 """;
-            case "php-8.3" -> """
-                <?php
-                echo "Hello, World!\\n";
-                """;
-            case "csharp-12" -> """
-                using System;
-
-                class Program {
-                    static void Main(string[] args) {
-                        Console.WriteLine("Hello, World!");
-                    }
-                }
-                """;
             case "kotlin-1.9" -> """
                 fun main() {
                     println("Hello, World!")
-                }
-                """;
-            case "dart-3.4" -> """
-                void main() {
-                  print('Hello, World!');
                 }
                 """;
             case "mysql-8.0" -> """

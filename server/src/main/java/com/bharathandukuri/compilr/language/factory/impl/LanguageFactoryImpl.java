@@ -28,10 +28,7 @@ public class LanguageFactoryImpl implements LanguageFactory {
     public static final String ID_TYPESCRIPT_5_4 = "typescript-5.4";
     public static final String ID_GO_1_22 = "go-1.22";
     public static final String ID_RUST_1_75 = "rust-1.75";
-    public static final String ID_PHP_8_3 = "php-8.3";
-    public static final String ID_CSHARP_12 = "csharp-12";
     public static final String ID_KOTLIN_1_9 = "kotlin-1.9";
-    public static final String ID_DART_3_4 = "dart-3.4";
     public static final String ID_MYSQL_8_0 = "mysql-8.0";
     public static final String ID_POSTGRESQL_16 = "postgresql-16";
     public static final String ID_SQLITE_3 = "sqlite-3";
@@ -46,10 +43,7 @@ public class LanguageFactoryImpl implements LanguageFactory {
             ID_TYPESCRIPT_5_4,
             ID_GO_1_22,
             ID_RUST_1_75,
-            ID_PHP_8_3,
-            ID_CSHARP_12,
             ID_KOTLIN_1_9,
-            ID_DART_3_4,
             ID_MYSQL_8_0,
             ID_POSTGRESQL_16,
             ID_SQLITE_3,
@@ -71,10 +65,7 @@ public class LanguageFactoryImpl implements LanguageFactory {
             case ID_TYPESCRIPT_5_4, "typescript", "ts", "typescript-node" -> createTypeScript54();
             case ID_GO_1_22, "go", "golang" -> createGo122();
             case ID_RUST_1_75, "rust", "rs" -> createRust175();
-            case ID_PHP_8_3, "php" -> createPhp83();
-            case ID_CSHARP_12, "csharp", "c#", "cs", "dotnet" -> createCsharp12();
             case ID_KOTLIN_1_9, "kotlin", "kt" -> createKotlin19();
-            case ID_DART_3_4, "dart" -> createDart34();
             case ID_MYSQL_8_0, "mysql" -> createMySql80();
             case ID_POSTGRESQL_16, "postgresql", "postgres" -> createPostgreSql16();
             case ID_SQLITE_3, "sqlite", "sqlite3" -> createSqlite3();
@@ -340,35 +331,6 @@ public class LanguageFactoryImpl implements LanguageFactory {
         );
     }
 
-    private InterpretedLanguage createPhp83() {
-        return createInterpreted(
-                ID_PHP_8_3,
-                "PHP (8.3)",
-                ".php",
-                DockerImageRegistry.PHP_8_3,
-                files -> {
-                    String scriptFile = (files == null || files.isEmpty())
-                            ? "main.php"
-                            : files.get(0);
-                    return List.of("php", scriptFile);
-                }
-        );
-    }
-
-    private CompiledLanguage createCsharp12() {
-        return createCompiled(
-                ID_CSHARP_12,
-                "C# (.NET 8.0)",
-                ".cs",
-                DockerImageRegistry.CSHARP_12,
-                files -> {
-                    String file = (files == null || files.isEmpty()) ? "Program.cs" : files.get(0);
-                    return List.of("bash", "-c", "dotnet new console --force -n App >/dev/null 2>&1 && cp " + file + " App/Program.cs && dotnet build App -c Release -o out --nologo");
-                },
-                files -> List.of("./out/App")
-        );
-    }
-
     private CompiledLanguage createKotlin19() {
         return createCompiled(
                 ID_KOTLIN_1_9,
@@ -388,21 +350,6 @@ public class LanguageFactoryImpl implements LanguageFactory {
                     return command;
                 },
                 files -> List.of("java", "-jar", "Main.jar")
-        );
-    }
-
-    private InterpretedLanguage createDart34() {
-        return createInterpreted(
-                ID_DART_3_4,
-                "Dart (3.4)",
-                ".dart",
-                DockerImageRegistry.DART_3_4,
-                files -> {
-                    String scriptFile = (files == null || files.isEmpty())
-                            ? "main.dart"
-                            : files.get(0);
-                    return List.of("dart", "run", scriptFile);
-                }
         );
     }
 

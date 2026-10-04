@@ -338,23 +338,17 @@ public class CodeExecutionServiceImpl implements CodeExecutionService {
             }
         }
 
-        // Managed runtimes (JVM, V8, Go, CLR, Dart VM) pre-allocate large virtual address spaces
+        // Managed runtimes (JVM, V8, Go) pre-allocate large virtual address spaces
         // for JIT code caches, GC card tables, and pointer compression. Setting RLIMIT_AS (--mem)
         // starves virtual address space and causes initialization crashes.
         String langId = language != null && language.id() != null ? language.id().toLowerCase() : "";
         if (langId.contains("java") || langId.contains("node") || langId.contains("javascript")
                 || langId.contains("kotlin") || langId.contains("typescript")
-                || langId.contains("csharp") || langId.contains("dotnet")
-                || langId.contains("go") || langId.contains("dart")) {
+                || langId.contains("go")) {
             memoryKb = null;
         }
 
-        // .NET CLR tiered JIT compiler uses ftruncate for internal memory-mapped code caches,
-        // which triggers SIGXFSZ (signal 25) when RLIMIT_FSIZE (--fsize) is enforced.
         Long fileSizeKb = 10240L;
-        if (langId.contains("csharp") || langId.contains("dotnet")) {
-            fileSizeKb = null;
-        }
 
         return new IsolateExecutionConstraints(
                 cpuTime,

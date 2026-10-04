@@ -323,41 +323,6 @@ fn main() {
 `,
   },
   {
-    id: "csharp-12",
-    name: "C# (.NET 8.0)",
-    shortName: "C#",
-    version: ".NET 8.0",
-    type: "COMPILED",
-    fileExtension: ".cs",
-    fileName: "Program.cs",
-    monacoLanguage: "csharp",
-    compiled: true,
-    popular: true,
-    tag: ".NET 8",
-    color: "#512BD4",
-    bgLight: "bg-purple-500/10",
-    borderColor: "border-purple-500/30",
-    aliases: ["csharp", "c#", "cs", "dotnet"],
-    defaultStarterCode: `using System;
-
-public class Program
-{
-    public static void Main(string[] args)
-    {
-        string? line = Console.ReadLine();
-        if (!string.IsNullOrEmpty(line))
-        {
-            Console.WriteLine($"Hello, {line}!");
-        }
-        else
-        {
-            Console.WriteLine("Hello, World!");
-        }
-    }
-}
-`,
-  },
-  {
     id: "kotlin-1.9",
     name: "Kotlin (1.9)",
     shortName: "Kotlin",
@@ -383,59 +348,6 @@ fun main() {
     } else {
         println("Hello, World!")
     }
-}
-`,
-  },
-  {
-    id: "dart-3.4",
-    name: "Dart (3.4)",
-    shortName: "Dart",
-    version: "3.4",
-    type: "INTERPRETED",
-    fileExtension: ".dart",
-    fileName: "main.dart",
-    monacoLanguage: "dart",
-    compiled: false,
-    popular: false,
-    tag: "3.4",
-    color: "#0175C2",
-    bgLight: "bg-sky-500/10",
-    borderColor: "border-sky-500/30",
-    aliases: ["dart"],
-    defaultStarterCode: `import 'dart:io';
-
-void main() {
-  String? line = stdin.readLineSync();
-  if (line != null && line.trim().isNotEmpty) {
-    print('Hello, \${line.trim()}!');
-  } else {
-    print('Hello, World!');
-  }
-}
-`,
-  },
-  {
-    id: "php-8.3",
-    name: "PHP (8.3)",
-    shortName: "PHP",
-    version: "8.3",
-    type: "INTERPRETED",
-    fileExtension: ".php",
-    fileName: "main.php",
-    monacoLanguage: "php",
-    compiled: false,
-    popular: false,
-    tag: "8.3",
-    color: "#777BB4",
-    bgLight: "bg-purple-600/10",
-    borderColor: "border-purple-600/30",
-    aliases: ["php"],
-    defaultStarterCode: `<?php
-$line = trim(fgets(STDIN));
-if (!empty($line)) {
-    echo "Hello, " . $line . "!\n";
-} else {
-    echo "Hello, World!\n";
 }
 `,
   },
