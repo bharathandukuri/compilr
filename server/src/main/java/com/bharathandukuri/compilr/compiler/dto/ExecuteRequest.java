@@ -11,7 +11,7 @@ public record ExecuteRequest(
         String language,
 
         @Size(max = 262144, message = "Source code exceeds maximum allowed size (256 KB).")
-        @Schema(description = "Source code to execute", example = "public class Solution { public static void main(String[] args) { System.out.println(\"Hello World!\"); } }")
+        @Schema(description = "Source code to execute", example = "public class Main { public static void main(String[] args) { System.out.println(\"Hello World!\"); } }")
         String sourceCode,
 
         @Size(max = 262144, message = "Standard input exceeds maximum allowed size (256 KB).")

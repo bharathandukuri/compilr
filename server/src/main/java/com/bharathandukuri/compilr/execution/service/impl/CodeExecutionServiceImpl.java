@@ -289,11 +289,11 @@ public class CodeExecutionServiceImpl implements CodeExecutionService {
 
         Language language = request.getLanguage();
         if ("java-21".equalsIgnoreCase(language.id())) {
-            return "Solution.java";
+            return "Main.java";
         }
 
         String ext = language.fileExtension() != null ? language.fileExtension() : "";
-        return "solution" + ext;
+        return "main" + ext;
     }
 
     private IsolateExecutionConstraints mapConstraints(Language language, CodeExecutionConstraints constraints) {

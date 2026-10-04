@@ -76,7 +76,7 @@ class LanguageRegistryTest {
     @DisplayName("defaultStarterCode: returns valid code snippets")
     void defaultStarterCode_returnsBoilerplate() {
         Language java = languageRegistry.get("java-21");
-        assertThat(java.defaultStarterCode()).contains("class Solution");
+        assertThat(java.defaultStarterCode()).contains("class Main");
 
         Language python = languageRegistry.get("python-3.12");
         assertThat(python.defaultStarterCode()).contains("sys.stdin");

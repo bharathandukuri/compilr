@@ -44,7 +44,7 @@ else:
     version: "Node.js 20",
     type: "INTERPRETED",
     fileExtension: ".js",
-    fileName: "index.js",
+    fileName: "main.js",
     monacoLanguage: "javascript",
     compiled: false,
     popular: true,
@@ -70,7 +70,7 @@ if (input) {
     version: "OpenJDK 21",
     type: "COMPILED",
     fileExtension: ".java",
-    fileName: "Solution.java",
+    fileName: "Main.java",
     monacoLanguage: "java",
     compiled: true,
     popular: true,
@@ -81,7 +81,7 @@ if (input) {
     aliases: ["java", "java21"],
     defaultStarterCode: `import java.util.Scanner;
 
-public class Solution {
+public class Main {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
         if (scanner.hasNextLine()) {
@@ -160,7 +160,7 @@ int main() {
     version: "16",
     type: "DATABASE",
     fileExtension: ".sql",
-    fileName: "query.sql",
+    fileName: "main.sql",
     monacoLanguage: "sql",
     compiled: false,
     popular: false,
@@ -179,7 +179,7 @@ int main() {
     version: "8.0",
     type: "DATABASE",
     fileExtension: ".sql",
-    fileName: "query.sql",
+    fileName: "main.sql",
     monacoLanguage: "sql",
     compiled: false,
     popular: false,
@@ -198,7 +198,7 @@ int main() {
     version: "5.4",
     type: "INTERPRETED",
     fileExtension: ".ts",
-    fileName: "index.ts",
+    fileName: "main.ts",
     monacoLanguage: "typescript",
     compiled: false,
     popular: false,
@@ -218,7 +218,7 @@ console.log(greeting);
     version: "3.45",
     type: "DATABASE",
     fileExtension: ".sql",
-    fileName: "query.sql",
+    fileName: "main.sql",
     monacoLanguage: "sql",
     compiled: false,
     popular: false,

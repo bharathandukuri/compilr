@@ -54,13 +54,13 @@ Compilr solves the challenge of executing arbitrary, untrusted user code in real
 
 | Language | Identifier | Version | Paradigm | Compiler / Runtime | Default File |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| **Java** | `java-21` (alias: `java`) | OpenJDK 21 | Compiled | `javac` & `java` | `Solution.java` |
-| **C** | `c-17` (alias: `c`) | C17 (GCC 14) | Compiled | `gcc -std=c17 -O2` | `solution.c` |
-| **C++** | `cpp-23` (alias: `cpp`, `c++`) | C++23 (GCC 14) | Compiled | `g++ -std=c++23 -O2` | `solution.cpp` |
-| **Python** | `python-3.12` (alias: `python`, `py`) | CPython 3.12 | Interpreted | `python3` | `solution.py` |
-| **JavaScript** | `javascript-node-20` (alias: `js`, `node`) | Node.js 20 | Interpreted | `node` | `solution.js` |
-| **PostgreSQL**| `postgresql-16` (alias: `postgres`, `psql`) | PostgreSQL 16 | Database | `psql` | `solution.sql` |
-| **MySQL** | `mysql-8.0` (alias: `mysql`, `sql`) | MySQL 8.0 | Database | `mysql` | `solution.sql` |
+| **Java** | `java-21` (alias: `java`) | OpenJDK 21 | Compiled | `javac` & `java` | `Main.java` |
+| **C** | `c-17` (alias: `c`) | C17 (GCC 14) | Compiled | `gcc -std=c17 -O2` | `main.c` |
+| **C++** | `cpp-23` (alias: `cpp`, `c++`) | C++23 (GCC 14) | Compiled | `g++ -std=c++23 -O2` | `main.cpp` |
+| **Python** | `python-3.12` (alias: `python`, `py`) | CPython 3.12 | Interpreted | `python3` | `main.py` |
+| **JavaScript** | `javascript-node-20` (alias: `js`, `node`) | Node.js 20 | Interpreted | `node` | `main.js` |
+| **PostgreSQL**| `postgresql-16` (alias: `postgres`, `psql`) | PostgreSQL 16 | Database | `psql` | `main.sql` |
+| **MySQL** | `mysql-8.0` (alias: `mysql`, `sql`) | MySQL 8.0 | Database | `mysql` | `main.sql` |
 
 ---
 
@@ -110,7 +110,7 @@ Compilr solves the challenge of executing arbitrary, untrusted user code in real
   "language": "cpp-23",
   "status": "COMPILATION_ERROR",
   "stdout": "",
-  "stderr": "solution.cpp: In function 'int main()':\nsolution.cpp:3:5: error: 'syntax_error' was not declared in this scope\n",
+  "stderr": "main.cpp: In function 'int main()':\nmain.cpp:3:5: error: 'syntax_error' was not declared in this scope\n",
   "exitCode": 1,
   "exitSignal": null,
   "executionTimeMs": 1420,

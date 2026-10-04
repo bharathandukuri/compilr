@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState } from "react"
+import React, { useRef, useEffect } from "react"
 import Editor, { type OnMount, type Monaco } from "@monaco-editor/react"
 import type * as monaco from "monaco-editor"
 import { useTheme } from "@/components/theme-provider"
@@ -6,8 +6,6 @@ import type { Language } from "@/types/compiler"
 import { getLanguageMeta } from "@/constants/languages"
 import { LanguageIcon } from "@/components/icons/LanguageIcons"
 import { useEditorSettings } from "@/stores/editorSettingsStore"
-import { Copy, Check } from "lucide-react"
-import { Button } from "@/components/ui/button"
 
 interface CodeEditorProps {
   language: Language | null
@@ -25,17 +23,8 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   const { theme } = useTheme()
   const settings = useEditorSettings()
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null)
-  const [copied, setCopied] = useState(false)
 
   const langMeta = getLanguageMeta(language)
-
-  const handleCopy = () => {
-    if (code) {
-      navigator.clipboard.writeText(code)
-      setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
-    }
-  }
 
   const handleEditorMount: OnMount = (editor, monacoInstance: Monaco) => {
     editorRef.current = editor
@@ -82,28 +71,6 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
         <div className="flex items-center gap-2 text-xs font-mono text-muted-foreground">
           <LanguageIcon languageId={language?.id} className="h-3.5 w-3.5 shrink-0" />
           <span className="font-medium text-foreground">{langMeta.fileName}</span>
-        </div>
-
-        <div className="flex items-center gap-1">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleCopy}
-            className="h-6 px-2 text-[11px] text-muted-foreground hover:text-foreground gap-1"
-            title="Copy code"
-          >
-            {copied ? (
-              <>
-                <Check className="h-3 w-3 text-emerald-500" />
-                <span className="text-emerald-500">Copied</span>
-              </>
-            ) : (
-              <>
-                <Copy className="h-3 w-3" />
-                <span>Copy</span>
-              </>
-            )}
-          </Button>
         </div>
       </div>
 

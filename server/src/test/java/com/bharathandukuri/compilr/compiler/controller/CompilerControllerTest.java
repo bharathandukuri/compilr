@@ -72,7 +72,7 @@ class CompilerControllerTest {
 
         ExecuteRequest request = new ExecuteRequest(
                 "java-21",
-                "public class Solution { public static void main(String[] args) {} }",
+                "public class Main { public static void main(String[] args) {} }",
                 "",
                 null
         );
@@ -187,7 +187,7 @@ class CompilerControllerTest {
                 "COMPILED",
                 ".java",
                 true,
-                "public class Solution {}",
+                "public class Main {}",
                 List.of("java")
         );
         when(compilerService.getSupportedLanguages()).thenReturn(List.of(java));

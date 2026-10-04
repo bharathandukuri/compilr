@@ -1,6 +1,6 @@
 import React, { useState } from "react"
 import { Link } from "@tanstack/react-router"
-import { Play, ArrowRight, Sun, Moon, Search, Terminal, Code2 } from "lucide-react"
+import { Play, ArrowRight, Sun, Moon, Search, Terminal, Code2, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useTheme } from "@/components/theme-provider"
 import { SUPPORTED_LANGUAGES, type LanguageMeta } from "@/constants/languages"
@@ -131,22 +131,35 @@ export const HomePage: React.FC = () => {
           </div>
 
           {/* Language Selection */}
-          <div className="w-full space-y-3 pt-6 text-left">
-            <div className="flex items-center justify-between pb-1">
+          <div className="w-full space-y-4 pt-6 text-left">
+            <div className="flex items-center justify-between pb-0.5">
               <span className="text-xs font-semibold tracking-wider text-muted-foreground uppercase">
                 Languages
               </span>
-              {SUPPORTED_LANGUAGES.length > 5 && (
-                <div className="relative w-44">
-                  <Search className="absolute top-1/2 left-2.5 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
-                  <input
-                    type="text"
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                    placeholder="Search..."
-                    className="w-full rounded-md border border-border bg-muted/40 py-1 pr-2.5 pl-8 text-xs text-foreground placeholder:text-muted-foreground focus:ring-1 focus:ring-primary focus:outline-hidden"
-                  />
-                </div>
+              <span className="text-[11px] text-muted-foreground font-mono">
+                {SUPPORTED_LANGUAGES.length} available
+              </span>
+            </div>
+
+            {/* Full-width clean Search Bar */}
+            <div className="relative w-full">
+              <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground/70" />
+              <input
+                type="text"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search languages (e.g. Python, Java, C++, TypeScript, SQL)..."
+                className="w-full rounded-lg border border-border/80 bg-muted/30 py-2.5 pr-9 pl-9 text-xs sm:text-sm text-foreground placeholder:text-muted-foreground/60 focus:border-primary/50 focus:bg-background focus:ring-2 focus:ring-primary/20 focus:outline-hidden transition-all shadow-2xs"
+              />
+              {search && (
+                <button
+                  type="button"
+                  onClick={() => setSearch("")}
+                  className="absolute top-1/2 right-2.5 -translate-y-1/2 text-muted-foreground hover:text-foreground cursor-pointer p-1 rounded-full hover:bg-muted"
+                  title="Clear search"
+                >
+                  <X className="h-3.5 w-3.5" />
+                </button>
               )}
             </div>
 

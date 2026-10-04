@@ -1,9 +1,7 @@
-import React, { useState } from "react"
+import React from "react"
 import {
   Terminal,
   CornerDownLeft,
-  Copy,
-  Check,
   Trash2,
   Loader2,
   CheckCircle2,
@@ -38,16 +36,6 @@ export const OutputPanel: React.FC<OutputPanelProps> = ({
   const activeTab = useActiveOutputTab()
   const isSplitView = useIsSplitView()
   const { setActiveOutputTab, toggleSplitView } = useCompilerActions()
-  const [copied, setCopied] = useState<boolean>(false)
-
-  const copyToClipboard = () => {
-    const textToCopy = result?.stdout || result?.stderr || result?.error || ""
-    if (textToCopy) {
-      navigator.clipboard.writeText(textToCopy)
-      setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
-    }
-  }
 
   const formatMemory = (kb?: number) => {
     if (!kb) return null
@@ -115,35 +103,7 @@ export const OutputPanel: React.FC<OutputPanelProps> = ({
   const hasStdout = Boolean(result?.stdout && result.stdout.length > 0)
   const hasStdin = Boolean(stdin && stdin.trim().length > 0)
 
-  // Render Stdin component
-  const renderStdinEditor = () => (
-    <div className="flex h-full w-full flex-col bg-background">
-      <div className="flex h-7 shrink-0 items-center justify-between border-b px-3 text-[11px] text-muted-foreground bg-muted/20">
-        <span>Standard Input (one argument per line)</span>
-        {stdin.length > 0 && (
-          <button
-            type="button"
-            onClick={() => onStdinChange("")}
-            className="hover:text-foreground text-[10px] cursor-pointer"
-          >
-            Clear input
-          </button>
-        )}
-      </div>
-      <div className="flex-1 p-2">
-        <textarea
-          value={stdin}
-          onChange={(e) => onStdinChange(e.target.value)}
-          disabled={isRunning}
-          placeholder="Enter input here..."
-          className="h-full w-full resize-none rounded bg-transparent p-2 font-mono text-xs text-foreground placeholder:text-muted-foreground/60 focus:outline-hidden focus:ring-1 focus:ring-primary/40 border border-border/40"
-          spellCheck={false}
-        />
-      </div>
-    </div>
-  )
-
-  // Render Output Console
+  // Render Output Console content
   const renderOutputConsole = () => (
     <div className="h-full w-full overflow-auto p-3 font-mono text-xs leading-relaxed select-text">
       {isRunning ? (
@@ -201,9 +161,116 @@ export const OutputPanel: React.FC<OutputPanelProps> = ({
     </div>
   )
 
+  // Render Stdin Input Textarea
+  const renderStdinTextarea = () => (
+    <div className="h-full w-full p-2 bg-background">
+      <textarea
+        value={stdin}
+        onChange={(e) => onStdinChange(e.target.value)}
+        disabled={isRunning}
+        placeholder="Enter standard input here..."
+        className="h-full w-full resize-none rounded bg-transparent p-2.5 font-mono text-xs text-foreground placeholder:text-muted-foreground/60 focus:outline-hidden focus:ring-1 focus:ring-primary/40 border border-border/40"
+        spellCheck={false}
+      />
+    </div>
+  )
+
+  // =========================================================================
+  // Render Split View Mode
+  // =========================================================================
+  if (isSplitView) {
+    return (
+      <div className="flex h-full w-full flex-col bg-background overflow-hidden border-l">
+        {/* Top Half: Output Pane with its dedicated Output Header */}
+        <div className="flex h-1/2 flex-col overflow-hidden border-b">
+          <div className="flex h-8 shrink-0 items-center justify-between border-b bg-muted/20 px-2 sm:px-3 select-none">
+            <div className="flex items-center gap-1.5 text-xs font-semibold text-foreground">
+              <Terminal className="h-3.5 w-3.5 text-primary" />
+              <span>Output</span>
+            </div>
+
+            <div className="flex items-center gap-2">
+              {!isRunning && result && (
+                <div className="flex items-center gap-2 text-[11px] font-mono text-muted-foreground">
+                  {getStatusBadge(result.status)}
+                  {result.executionTimeMs !== undefined && (
+                    <span>{result.executionTimeMs}ms</span>
+                  )}
+                  {result.memoryUsageKb && (
+                    <span className="hidden sm:inline">· {formatMemory(result.memoryUsageKb)}</span>
+                  )}
+                </div>
+              )}
+
+              {/* Split View Toggle */}
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={toggleSplitView}
+                className="h-6 w-6 text-foreground bg-muted hover:bg-muted/80 hidden sm:flex"
+                title="Switch to single view"
+              >
+                <Columns className="h-3 w-3" />
+              </Button>
+
+              {/* Clear Output Button */}
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={onClear}
+                disabled={isRunning || !result}
+                className="h-6 w-6 text-muted-foreground hover:text-foreground"
+                title="Clear output"
+              >
+                <Trash2 className="h-3 w-3" />
+              </Button>
+            </div>
+          </div>
+
+          <div className="flex-1 overflow-hidden">
+            {renderOutputConsole()}
+          </div>
+        </div>
+
+        {/* Bottom Half: Input Pane with its dedicated Input Header */}
+        <div className="flex h-1/2 flex-col overflow-hidden">
+          <div className="flex h-8 shrink-0 items-center justify-between border-b bg-muted/20 px-2 sm:px-3 select-none">
+            <div className="flex items-center gap-1.5 text-xs font-semibold text-foreground">
+              <CornerDownLeft className="h-3.5 w-3.5 text-primary" />
+              <span>Standard Input</span>
+              <span className="text-[11px] font-normal text-muted-foreground hidden sm:inline">
+                (one argument per line)
+              </span>
+            </div>
+
+            <div className="flex items-center gap-2">
+              {hasStdin && (
+                <button
+                  type="button"
+                  onClick={() => onStdinChange("")}
+                  disabled={isRunning}
+                  className="text-[11px] text-muted-foreground hover:text-foreground cursor-pointer font-medium"
+                >
+                  Clear input
+                </button>
+              )}
+            </div>
+          </div>
+
+          <div className="flex-1 overflow-hidden">
+            {renderStdinTextarea()}
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // =========================================================================
+  // Render Single (Tabbed) Mode
+  // =========================================================================
   return (
     <div className="flex h-full w-full flex-col bg-background overflow-hidden border-l">
-      {/* Top Bar with Navigation & Actions */}
+      {/* Top Bar with Navigation Tabs & Actions */}
       <div className="flex h-8 shrink-0 items-center justify-between border-b bg-muted/20 px-2 sm:px-3 select-none">
         {/* Navigation Tabs */}
         <div className="flex items-center gap-1">
@@ -211,7 +278,7 @@ export const OutputPanel: React.FC<OutputPanelProps> = ({
             type="button"
             onClick={() => setActiveOutputTab("output")}
             className={`flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded transition-colors cursor-pointer ${
-              activeTab === "output" && !isSplitView
+              activeTab === "output"
                 ? "bg-background text-foreground shadow-2xs font-semibold"
                 : "text-muted-foreground hover:text-foreground"
             }`}
@@ -224,7 +291,7 @@ export const OutputPanel: React.FC<OutputPanelProps> = ({
             type="button"
             onClick={() => setActiveOutputTab("stdin")}
             className={`flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded transition-colors cursor-pointer ${
-              activeTab === "stdin" && !isSplitView
+              activeTab === "stdin"
                 ? "bg-background text-foreground shadow-2xs font-semibold"
                 : "text-muted-foreground hover:text-foreground"
             }`}
@@ -240,7 +307,7 @@ export const OutputPanel: React.FC<OutputPanelProps> = ({
         {/* Right Actions & Status */}
         <div className="flex items-center gap-2">
           {/* Status summary */}
-          {!isRunning && result && (
+          {!isRunning && result && activeTab === "output" && (
             <div className="flex items-center gap-2 text-[11px] font-mono text-muted-foreground">
               {getStatusBadge(result.status)}
               {result.executionTimeMs !== undefined && (
@@ -252,65 +319,47 @@ export const OutputPanel: React.FC<OutputPanelProps> = ({
             </div>
           )}
 
-          {/* Split view toggle */}
+          {/* Split View Toggle */}
           <Button
             variant="ghost"
             size="icon"
             onClick={toggleSplitView}
-            className={`h-6 w-6 text-muted-foreground hover:text-foreground hidden sm:flex ${
-              isSplitView ? "bg-muted text-foreground" : ""
-            }`}
-            title={isSplitView ? "Switch to single view" : "Split Output & Input"}
+            className="h-6 w-6 text-muted-foreground hover:text-foreground hidden sm:flex"
+            title="Split Output & Input"
           >
             <Columns className="h-3 w-3" />
           </Button>
 
-          {/* Copy Button */}
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={copyToClipboard}
-            disabled={isRunning || !result}
-            className="h-6 w-6 text-muted-foreground hover:text-foreground"
-            title="Copy output"
-          >
-            {copied ? (
-              <Check className="h-3 w-3 text-emerald-500" />
-            ) : (
-              <Copy className="h-3 w-3" />
-            )}
-          </Button>
-
           {/* Clear Button */}
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={onClear}
-            disabled={isRunning || !result}
-            className="h-6 w-6 text-muted-foreground hover:text-foreground"
-            title="Clear output"
-          >
-            <Trash2 className="h-3 w-3" />
-          </Button>
+          {activeTab === "output" ? (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={onClear}
+              disabled={isRunning || !result}
+              className="h-6 w-6 text-muted-foreground hover:text-foreground"
+              title="Clear output"
+            >
+              <Trash2 className="h-3 w-3" />
+            </Button>
+          ) : (
+            hasStdin && (
+              <button
+                type="button"
+                onClick={() => onStdinChange("")}
+                disabled={isRunning}
+                className="text-[11px] text-muted-foreground hover:text-foreground cursor-pointer font-medium"
+              >
+                Clear input
+              </button>
+            )
+          )}
         </div>
       </div>
 
       {/* Main Content Area */}
       <div className="flex-1 overflow-hidden">
-        {isSplitView ? (
-          <div className="flex h-full flex-col">
-            <div className="h-1/2 overflow-hidden border-b">
-              {renderOutputConsole()}
-            </div>
-            <div className="h-1/2 overflow-hidden">
-              {renderStdinEditor()}
-            </div>
-          </div>
-        ) : activeTab === "output" ? (
-          renderOutputConsole()
-        ) : (
-          renderStdinEditor()
-        )}
+        {activeTab === "output" ? renderOutputConsole() : renderStdinTextarea()}
       </div>
     </div>
   )

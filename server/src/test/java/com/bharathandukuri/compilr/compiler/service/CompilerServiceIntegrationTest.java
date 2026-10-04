@@ -38,10 +38,10 @@ class CompilerServiceIntegrationTest {
     }
 
     @Test
-    @DisplayName("Java 21: compiles and executes Solution class")
+    @DisplayName("Java 21: compiles and executes Main class")
     void execute_javaSuccess() {
         String javaCode = """
-                public class Solution {
+                public class Main {
                     public static void main(String[] args) {
                         int a = 15;
                         int b = 27;

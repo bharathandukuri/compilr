@@ -58,7 +58,7 @@ public interface Language {
             case "java-21" -> """
                 import java.util.Scanner;
 
-                public class Solution {
+                public class Main {
                     public static void main(String[] args) {
                         Scanner scanner = new Scanner(System.in);
                         if (scanner.hasNextLine()) {

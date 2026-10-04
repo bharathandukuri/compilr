@@ -85,7 +85,7 @@ class CompilerServiceTest {
 
         ExecuteRequest request = new ExecuteRequest(
                 "java-21",
-                "public class Solution { public static void main(String[] args) {} }",
+                "public class Main { public static void main(String[] args) {} }",
                 "test input",
                 new CompilerOptionsDto(4000L, 262144L)
         );

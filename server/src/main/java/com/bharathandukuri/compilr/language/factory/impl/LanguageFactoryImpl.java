@@ -126,7 +126,7 @@ public class LanguageFactoryImpl implements LanguageFactory {
                 DockerImageRegistry.JAVA_21,
                 files -> {
                     List<String> effectiveFiles = (files == null || files.isEmpty())
-                            ? List.of("Solution.java")
+                            ? List.of("Main.java")
                             : files;
                     List<String> command = new ArrayList<>();
                     command.add("javac");
@@ -135,7 +135,7 @@ public class LanguageFactoryImpl implements LanguageFactory {
                 },
                 files -> {
                     String mainFile = (files == null || files.isEmpty())
-                            ? "Solution.java"
+                            ? "Main.java"
                             : files.get(0);
                     String className = extractBaseName(mainFile);
                     return List.of("java", "-cp", ".", className);
@@ -151,7 +151,7 @@ public class LanguageFactoryImpl implements LanguageFactory {
                 DockerImageRegistry.C_17,
                 files -> {
                     List<String> effectiveFiles = (files == null || files.isEmpty())
-                            ? List.of("solution.c")
+                            ? List.of("main.c")
                             : files;
                     List<String> command = new ArrayList<>();
                     command.add("gcc");
@@ -176,7 +176,7 @@ public class LanguageFactoryImpl implements LanguageFactory {
                 DockerImageRegistry.CPP_23,
                 files -> {
                     List<String> effectiveFiles = (files == null || files.isEmpty())
-                            ? List.of("solution.cpp")
+                            ? List.of("main.cpp")
                             : files;
                     List<String> command = new ArrayList<>();
                     command.add("g++");
@@ -200,7 +200,7 @@ public class LanguageFactoryImpl implements LanguageFactory {
                 DockerImageRegistry.PYTHON_3_12,
                 files -> {
                     String scriptFile = (files == null || files.isEmpty())
-                            ? "solution.py"
+                            ? "main.py"
                             : files.get(0);
                     return List.of("python3", scriptFile);
                 }
@@ -215,7 +215,7 @@ public class LanguageFactoryImpl implements LanguageFactory {
                 DockerImageRegistry.JAVASCRIPT_NODE_20,
                 files -> {
                     String scriptFile = (files == null || files.isEmpty())
-                            ? "solution.js"
+                            ? "main.js"
                             : files.get(0);
                     return List.of("node", scriptFile);
                 }
@@ -230,7 +230,7 @@ public class LanguageFactoryImpl implements LanguageFactory {
                 DockerImageRegistry.MYSQL_8_0,
                 files -> {
                     String scriptFile = (files == null || files.isEmpty())
-                            ? "solution.sql"
+                            ? "main.sql"
                             : files.get(0);
                     return List.of("mysql", "-u", "root", "-pstacked_judge", "stacked_judge_db", "-e", "source " + scriptFile);
                 }
@@ -245,7 +245,7 @@ public class LanguageFactoryImpl implements LanguageFactory {
                 DockerImageRegistry.POSTGRES_16,
                 files -> {
                     String scriptFile = (files == null || files.isEmpty())
-                            ? "solution.sql"
+                            ? "main.sql"
                             : files.get(0);
                     return List.of("psql", "-U", "postgres", "-d", "stacked_judge_db", "-f", scriptFile);
                 }
