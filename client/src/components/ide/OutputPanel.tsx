@@ -11,6 +11,11 @@ import {
   Columns,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import {
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+} from "@/components/ui/tooltip"
 import type { ExecuteResponse, ExecutionStatus } from "@/types/compiler"
 import {
   useActiveOutputTab,
@@ -203,27 +208,39 @@ export const OutputPanel: React.FC<OutputPanelProps> = ({
               )}
 
               {/* Split View Toggle */}
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={toggleSplitView}
-                className="h-6 w-6 text-foreground bg-muted hover:bg-muted/80 hidden sm:flex"
-                title="Switch to single view"
-              >
-                <Columns className="h-3 w-3" />
-              </Button>
+              <Tooltip>
+                <TooltipTrigger
+                  render={
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={toggleSplitView}
+                      className="h-6 w-6 text-foreground bg-muted hover:bg-muted/80 hidden sm:flex cursor-pointer"
+                    >
+                      <Columns className="h-3 w-3" />
+                    </Button>
+                  }
+                />
+                <TooltipContent>Switch to single view</TooltipContent>
+              </Tooltip>
 
               {/* Clear Output Button */}
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={onClear}
-                disabled={isRunning || !result}
-                className="h-6 w-6 text-muted-foreground hover:text-foreground"
-                title="Clear output"
-              >
-                <Trash2 className="h-3 w-3" />
-              </Button>
+              <Tooltip>
+                <TooltipTrigger
+                  render={
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={onClear}
+                      disabled={isRunning || !result}
+                      className="h-6 w-6 text-muted-foreground hover:text-foreground cursor-pointer"
+                    >
+                      <Trash2 className="h-3 w-3" />
+                    </Button>
+                  }
+                />
+                <TooltipContent>Clear output</TooltipContent>
+              </Tooltip>
             </div>
           </div>
 
@@ -299,7 +316,14 @@ export const OutputPanel: React.FC<OutputPanelProps> = ({
             <CornerDownLeft className="h-3 w-3" />
             <span>Input</span>
             {hasStdin && (
-              <span className="h-1.5 w-1.5 rounded-full bg-primary" title="Stdin provided" />
+              <Tooltip>
+                <TooltipTrigger
+                  render={
+                    <span className="h-1.5 w-1.5 rounded-full bg-primary" />
+                  }
+                />
+                <TooltipContent>Stdin provided</TooltipContent>
+              </Tooltip>
             )}
           </button>
         </div>
@@ -320,38 +344,57 @@ export const OutputPanel: React.FC<OutputPanelProps> = ({
           )}
 
           {/* Split View Toggle */}
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={toggleSplitView}
-            className="h-6 w-6 text-muted-foreground hover:text-foreground hidden sm:flex"
-            title="Split Output & Input"
-          >
-            <Columns className="h-3 w-3" />
-          </Button>
+          <Tooltip>
+            <TooltipTrigger
+              render={
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={toggleSplitView}
+                  className="h-6 w-6 text-muted-foreground hover:text-foreground hidden sm:flex cursor-pointer"
+                >
+                  <Columns className="h-3 w-3" />
+                </Button>
+              }
+            />
+            <TooltipContent>Split output & stdin</TooltipContent>
+          </Tooltip>
 
           {/* Clear Button */}
           {activeTab === "output" ? (
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={onClear}
-              disabled={isRunning || !result}
-              className="h-6 w-6 text-muted-foreground hover:text-foreground"
-              title="Clear output"
-            >
-              <Trash2 className="h-3 w-3" />
-            </Button>
+            <Tooltip>
+              <TooltipTrigger
+                render={
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={onClear}
+                    disabled={isRunning || !result}
+                    className="h-6 w-6 text-muted-foreground hover:text-foreground cursor-pointer"
+                  >
+                    <Trash2 className="h-3 w-3" />
+                  </Button>
+                }
+              />
+              <TooltipContent>Clear output</TooltipContent>
+            </Tooltip>
           ) : (
             hasStdin && (
-              <button
-                type="button"
-                onClick={() => onStdinChange("")}
-                disabled={isRunning}
-                className="text-[11px] text-muted-foreground hover:text-foreground cursor-pointer font-medium"
-              >
-                Clear input
-              </button>
+              <Tooltip>
+                <TooltipTrigger
+                  render={
+                    <button
+                      type="button"
+                      onClick={() => onStdinChange("")}
+                      disabled={isRunning}
+                      className="text-[11px] text-muted-foreground hover:text-foreground cursor-pointer font-medium"
+                    >
+                      Clear input
+                    </button>
+                  }
+                />
+                <TooltipContent>Clear stdin</TooltipContent>
+              </Tooltip>
             )
           )}
         </div>

@@ -26,6 +26,11 @@ import {
 } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
+import {
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+} from "@/components/ui/tooltip"
 
 interface HeaderProps {
   languages: Language[]
@@ -62,30 +67,40 @@ export const Header: React.FC<HeaderProps> = ({
       {/* Left: Branding & Language Selector */}
       <div className="flex items-center gap-3">
         {/* Brand / Home link via TanStack Router */}
-        <Link
-          to="/"
-          className="flex items-center gap-2 hover:opacity-85 transition-opacity cursor-pointer group"
-          title="Return to Compilr Home"
-        >
-          <div className="flex h-7 w-7 items-center justify-center rounded-md bg-primary text-primary-foreground shadow-2xs">
-            <Code2 className="h-4 w-4" />
-          </div>
-          <span className="text-sm font-bold tracking-tight text-foreground">
-            Compilr
-          </span>
-        </Link>
+        <Tooltip>
+          <TooltipTrigger
+            render={
+              <Link
+                to="/"
+                className="flex items-center gap-2 hover:opacity-85 transition-opacity cursor-pointer group"
+              >
+                <div className="flex h-7 w-7 items-center justify-center rounded-md bg-primary text-primary-foreground shadow-2xs">
+                  <Code2 className="h-4 w-4" />
+                </div>
+                <span className="text-sm font-bold tracking-tight text-foreground">
+                  Compilr
+                </span>
+              </Link>
+            }
+          />
+          <TooltipContent>Return to Home</TooltipContent>
+        </Tooltip>
 
         <span className="text-border h-4 w-px bg-border hidden sm:block" />
 
         {/* Offline indicator only if backend is down */}
         {!isBackendHealthy && (
-          <div
-            className="flex items-center gap-1 text-[11px] text-rose-500 font-medium px-2 py-0.5 rounded-full bg-rose-500/10"
-            title="Compiler backend is offline"
-          >
-            <AlertCircle className="h-3 w-3" />
-            <span className="hidden md:inline">Offline</span>
-          </div>
+          <Tooltip>
+            <TooltipTrigger
+              render={
+                <div className="flex items-center gap-1 text-[11px] text-rose-500 font-medium px-2 py-0.5 rounded-full bg-rose-500/10 cursor-help">
+                  <AlertCircle className="h-3 w-3" />
+                  <span className="hidden md:inline">Offline</span>
+                </div>
+              }
+            />
+            <TooltipContent>Compiler backend is offline</TooltipContent>
+          </Tooltip>
         )}
 
         {/* Compact Language Selector with Icon */}
@@ -129,32 +144,44 @@ export const Header: React.FC<HeaderProps> = ({
 
       {/* Right: Actions (Reset, Settings, Theme, Run) */}
       <div className="flex items-center gap-1.5 sm:gap-2">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={onResetCode}
-          disabled={isRunning}
-          title="Reset code to default template"
-          className="h-8 px-2 sm:px-2.5 text-xs text-muted-foreground hover:text-foreground gap-1"
-        >
-          <RotateCcw className="h-3.5 w-3.5" />
-          <span className="hidden sm:inline">Reset</span>
-        </Button>
-
-        {/* Editor Settings Dialog */}
-        <Dialog>
-          <DialogTrigger
+        {/* Reset Code Button */}
+        <Tooltip>
+          <TooltipTrigger
             render={
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-8 w-8 text-muted-foreground hover:text-foreground"
-                title="Editor Settings"
+                onClick={onResetCode}
+                disabled={isRunning}
+                className="h-8 w-8 text-muted-foreground hover:text-foreground cursor-pointer"
               >
-                <Settings className="h-3.5 w-3.5" />
+                <RotateCcw className="h-3.5 w-3.5" />
               </Button>
             }
           />
+          <TooltipContent>Reset code to template</TooltipContent>
+        </Tooltip>
+
+        {/* Editor Settings Dialog */}
+        <Dialog>
+          <Tooltip>
+            <TooltipTrigger
+              render={
+                <DialogTrigger
+                  render={
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 text-muted-foreground hover:text-foreground cursor-pointer"
+                    >
+                      <Settings className="h-3.5 w-3.5" />
+                    </Button>
+                  }
+                />
+              }
+            />
+            <TooltipContent>Editor settings</TooltipContent>
+          </Tooltip>
           <DialogContent className="sm:max-w-xs">
             <DialogHeader>
               <DialogTitle className="text-sm font-semibold">Editor Settings</DialogTitle>
@@ -227,42 +254,57 @@ export const Header: React.FC<HeaderProps> = ({
         </Dialog>
 
         {/* Theme Toggle */}
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={toggleTheme}
-          title={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
-          className="h-8 w-8 text-muted-foreground hover:text-foreground"
-        >
-          {theme === "dark" ? (
-            <Sun className="h-3.5 w-3.5 text-amber-400" />
-          ) : (
-            <Moon className="h-3.5 w-3.5" />
-          )}
-        </Button>
+        <Tooltip>
+          <TooltipTrigger
+            render={
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={toggleTheme}
+                className="h-8 w-8 text-muted-foreground hover:text-foreground cursor-pointer"
+              >
+                {theme === "dark" ? (
+                  <Sun className="h-3.5 w-3.5 text-amber-400" />
+                ) : (
+                  <Moon className="h-3.5 w-3.5" />
+                )}
+              </Button>
+            }
+          />
+          <TooltipContent>
+            Switch to {theme === "dark" ? "light" : "dark"} mode
+          </TooltipContent>
+        </Tooltip>
 
         {/* Run Button */}
-        <Button
-          onClick={onRun}
-          disabled={isRunning || !selectedLanguage}
-          size="sm"
-          className="h-8 px-3.5 gap-1.5 font-semibold text-xs bg-emerald-600 hover:bg-emerald-500 text-white shadow-2xs cursor-pointer"
-        >
-          {isRunning ? (
-            <>
-              <Loader2 className="h-3.5 w-3.5 animate-spin" />
-              <span>Running...</span>
-            </>
-          ) : (
-            <>
-              <Play className="h-3 w-3 fill-current" />
-              <span>Run</span>
-              <kbd className="hidden md:inline-block ml-0.5 rounded bg-black/20 px-1 text-[10px] font-mono text-white/90">
-                ⌘↵
-              </kbd>
-            </>
-          )}
-        </Button>
+        <Tooltip>
+          <TooltipTrigger
+            render={
+              <Button
+                onClick={onRun}
+                disabled={isRunning || !selectedLanguage}
+                size="sm"
+                className="h-8 px-3.5 gap-1.5 font-semibold text-xs bg-emerald-600 hover:bg-emerald-500 text-white shadow-2xs cursor-pointer"
+              >
+                {isRunning ? (
+                  <>
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    <span>Running...</span>
+                  </>
+                ) : (
+                  <>
+                    <Play className="h-3 w-3 fill-current" />
+                    <span>Run</span>
+                    <kbd className="hidden md:inline-block ml-0.5 rounded bg-black/20 px-1 text-[10px] font-mono text-white/90">
+                      ⌘↵
+                    </kbd>
+                  </>
+                )}
+              </Button>
+            }
+          />
+          <TooltipContent>Run code (⌘+Enter / Ctrl+Enter)</TooltipContent>
+        </Tooltip>
       </div>
     </header>
   )

@@ -1,6 +1,11 @@
 import React from "react"
 import { Trash2, CornerDownLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import {
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+} from "@/components/ui/tooltip"
 
 interface StdinPanelProps {
   value: string
@@ -27,17 +32,23 @@ export const StdinPanel: React.FC<StdinPanelProps> = ({
               {value.length} chars
             </span>
           )}
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => onChange("")}
-            disabled={disabled || value.length === 0}
-            className="h-6 px-1.5 text-[11px] text-muted-foreground hover:text-foreground"
-            title="Clear stdin"
-          >
-            <Trash2 className="h-3 w-3 mr-1" />
-            Clear
-          </Button>
+          <Tooltip>
+            <TooltipTrigger
+              render={
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => onChange("")}
+                  disabled={disabled || value.length === 0}
+                  className="h-6 px-1.5 text-[11px] text-muted-foreground hover:text-foreground cursor-pointer"
+                >
+                  <Trash2 className="h-3 w-3 mr-1" />
+                  Clear
+                </Button>
+              }
+            />
+            <TooltipContent>Clear stdin</TooltipContent>
+          </Tooltip>
         </div>
       </div>
 

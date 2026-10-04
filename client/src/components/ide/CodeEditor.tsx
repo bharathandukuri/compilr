@@ -1,5 +1,5 @@
 import React, { useRef, useEffect } from "react"
-import Editor, { type OnMount, type Monaco } from "@monaco-editor/react"
+import Editor, { type OnMount, type BeforeMount, type Monaco } from "@monaco-editor/react"
 import type * as monaco from "monaco-editor"
 import { useTheme } from "@/components/theme-provider"
 import type { Language } from "@/types/compiler"
@@ -23,11 +23,46 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   const { theme } = useTheme()
   const settings = useEditorSettings()
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null)
+  const monacoRef = useRef<Monaco | null>(null)
 
   const langMeta = getLanguageMeta(language)
 
+  const handleBeforeMount: BeforeMount = (monacoInstance) => {
+    monacoRef.current = monacoInstance
+
+    // Configure JavaScript and TypeScript compiler options & diagnostics
+    // Disable noisy semantic validation in online compiler sandbox for JS/TS
+    // so require(), Node.js modules, and global variables do not produce false error markers
+    const tsDefaults = monacoInstance.languages.typescript.typescriptDefaults
+    const jsDefaults = monacoInstance.languages.typescript.javascriptDefaults
+
+    tsDefaults.setDiagnosticsOptions({
+      noSemanticValidation: true,
+      noSyntaxValidation: false,
+    })
+    jsDefaults.setDiagnosticsOptions({
+      noSemanticValidation: true,
+      noSyntaxValidation: false,
+    })
+
+    const compilerOptions = {
+      target: monacoInstance.languages.typescript.ScriptTarget.ES2022,
+      allowNonTextExtensions: true,
+      moduleResolution: monacoInstance.languages.typescript.ModuleResolutionKind.NodeJs,
+      module: monacoInstance.languages.typescript.ModuleKind.CommonJS,
+      noEmit: true,
+      lib: ["es2022", "dom"],
+    }
+    tsDefaults.setCompilerOptions(compilerOptions)
+    jsDefaults.setCompilerOptions(compilerOptions)
+  }
+
   const handleEditorMount: OnMount = (editor, monacoInstance: Monaco) => {
     editorRef.current = editor
+    monacoRef.current = monacoInstance
+
+    // Clear any stale markers from previous sessions
+    monacoInstance.editor.removeAllMarkers?.()
 
     // Add command for Cmd+Enter / Ctrl+Enter to trigger execution
     editor.addCommand(
@@ -45,6 +80,23 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
       }
     )
   }
+
+  // Clear existing markers whenever the active language changes
+  // to prevent errors from one language lingering on another
+  useEffect(() => {
+    if (monacoRef.current) {
+      monacoRef.current.editor.removeAllMarkers?.()
+      if (editorRef.current) {
+        const model = editorRef.current.getModel()
+        if (model) {
+          const markers = monacoRef.current.editor.getModelMarkers({ resource: model.uri })
+          markers.forEach((m: monaco.editor.IMarker) => {
+            monacoRef.current?.editor.setModelMarkers(model, m.owner, [])
+          })
+        }
+      }
+    }
+  }, [language?.id])
 
   // Update editor settings dynamically from Zustand store
   useEffect(() => {
@@ -79,9 +131,11 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
         <Editor
           height="100%"
           width="100%"
+          path={`${language?.id || "default"}/${langMeta.fileName}`}
           language={langMeta.monacoLanguage}
           theme={isDark ? "vs-dark" : "light"}
           value={code}
+          beforeMount={handleBeforeMount}
           onChange={(val) => onChange(val || "")}
           onMount={handleEditorMount}
           loading={

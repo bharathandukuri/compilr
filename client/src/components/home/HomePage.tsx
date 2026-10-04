@@ -2,6 +2,11 @@ import React, { useState } from "react"
 import { Link } from "@tanstack/react-router"
 import { Play, ArrowRight, Sun, Moon, Search, Terminal, Code2, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import {
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+} from "@/components/ui/tooltip"
 import { useTheme } from "@/components/theme-provider"
 import { SUPPORTED_LANGUAGES, type LanguageMeta } from "@/constants/languages"
 import { LanguageIcon } from "@/components/icons/LanguageIcons"
@@ -87,19 +92,27 @@ export const HomePage: React.FC = () => {
             </Button>
           </Link>
 
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={toggleTheme}
-            title={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
-            className="h-8 w-8 text-muted-foreground hover:text-foreground cursor-pointer"
-          >
-            {theme === "dark" ? (
-              <Sun className="h-4 w-4 text-amber-400" />
-            ) : (
-              <Moon className="h-4 w-4" />
-            )}
-          </Button>
+          <Tooltip>
+            <TooltipTrigger
+              render={
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={toggleTheme}
+                  className="h-8 w-8 text-muted-foreground hover:text-foreground cursor-pointer"
+                >
+                  {theme === "dark" ? (
+                    <Sun className="h-4 w-4 text-amber-400" />
+                  ) : (
+                    <Moon className="h-4 w-4" />
+                  )}
+                </Button>
+              }
+            />
+            <TooltipContent>
+              Switch to {theme === "dark" ? "light" : "dark"} mode
+            </TooltipContent>
+          </Tooltip>
         </div>
       </header>
 
@@ -152,14 +165,20 @@ export const HomePage: React.FC = () => {
                 className="w-full rounded-lg border border-border/80 bg-muted/30 py-2.5 pr-9 pl-9 text-xs sm:text-sm text-foreground placeholder:text-muted-foreground/60 focus:border-primary/50 focus:bg-background focus:ring-2 focus:ring-primary/20 focus:outline-hidden transition-all shadow-2xs"
               />
               {search && (
-                <button
-                  type="button"
-                  onClick={() => setSearch("")}
-                  className="absolute top-1/2 right-2.5 -translate-y-1/2 text-muted-foreground hover:text-foreground cursor-pointer p-1 rounded-full hover:bg-muted"
-                  title="Clear search"
-                >
-                  <X className="h-3.5 w-3.5" />
-                </button>
+                <Tooltip>
+                  <TooltipTrigger
+                    render={
+                      <button
+                        type="button"
+                        onClick={() => setSearch("")}
+                        className="absolute top-1/2 right-2.5 -translate-y-1/2 text-muted-foreground hover:text-foreground cursor-pointer p-1 rounded-full hover:bg-muted"
+                      >
+                        <X className="h-3.5 w-3.5" />
+                      </button>
+                    }
+                  />
+                  <TooltipContent>Clear search</TooltipContent>
+                </Tooltip>
               )}
             </div>
 
