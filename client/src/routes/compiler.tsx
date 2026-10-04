@@ -70,13 +70,14 @@ function CompilerPage() {
     if (isMobile) {
       setMobileTab("output")
     }
+    const isDatabase = activeLanguage.type === "DATABASE"
     executeMutation.mutate({
       language: activeLanguage.id,
       sourceCode: currentCode,
       stdin: currentStdin,
       options: {
-        timeLimitMs: 5000,
-        memoryLimitKb: 262144,
+        timeLimitMs: isDatabase ? 10000 : 5000,
+        memoryLimitKb: isDatabase ? 524288 : 262144,
       },
     })
   }
