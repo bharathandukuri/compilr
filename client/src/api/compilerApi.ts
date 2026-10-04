@@ -8,7 +8,7 @@ export const compilerApi = {
       return response.data
     } catch (error) {
       const message = normalizeError(error)
-      throw new Error(message)
+      throw new Error(message, { cause: error })
     }
   },
 
@@ -18,7 +18,7 @@ export const compilerApi = {
       return response.data
     } catch (error) {
       const message = normalizeError(error)
-      throw new Error(message)
+      throw new Error(message, { cause: error })
     }
   },
 
@@ -28,7 +28,7 @@ export const compilerApi = {
       return response.data
     } catch (error) {
       const message = normalizeError(error)
-      throw new Error(message)
+      throw new Error(message, { cause: error })
     }
   },
 

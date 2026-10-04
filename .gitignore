@@ -1,0 +1,21 @@
+# IDE & Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Dependencies & Build
+node_modules/
+dist/
+target/
+
+# Logs
+*.log
+
+# Agents & Skills metadata
+.agents/
+skills-lock.json
