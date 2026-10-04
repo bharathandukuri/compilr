@@ -1,0 +1,9 @@
+package com.bharathandukuri.compilr.language;
+
+public interface InterpretedLanguage extends Language {
+
+    @Override
+    default LanguageType type() {
+        return LanguageType.INTERPRETED;
+    }
+}

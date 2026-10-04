@@ -1,0 +1,37 @@
+services:
+  backend:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: compilr-backend
+    ports:
+      - "8080:8080"
+    environment:
+      - SERVER_PORT=8080
+      - COMPILR_EXECUTION_DOCKER_HOST=unix:///var/run/docker.sock
+      - COMPILR_COMPILER_DEFAULT_TIME_LIMIT_MS=5000
+      - COMPILR_COMPILER_MAX_TIME_LIMIT_MS=15000
+      - COMPILR_COMPILER_DEFAULT_MEMORY_LIMIT_KB=262144
+    volumes:
+      # Mount host docker socket to allow backend to launch sandbox containers
+      - /var/run/docker.sock:/var/run/docker.sock
+    restart: unless-stopped
+    networks:
+      - compilr-network
+
+  frontend:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    container_name: compilr-frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+    networks:
+      - compilr-network
+
+networks:
+  compilr-network:
+    driver: bridge
