@@ -191,6 +191,45 @@ int main() {
     defaultStarterCode: `SELECT 'Hello, World!' AS message;
 `,
   },
+  {
+    id: "typescript-node",
+    name: "TypeScript (Node.js)",
+    shortName: "TypeScript",
+    version: "5.4",
+    type: "INTERPRETED",
+    fileExtension: ".ts",
+    fileName: "index.ts",
+    monacoLanguage: "typescript",
+    compiled: false,
+    popular: false,
+    tag: "TS 5.4",
+    color: "#3178C6",
+    bgLight: "bg-blue-600/10",
+    borderColor: "border-blue-600/30",
+    aliases: ["typescript", "ts"],
+    defaultStarterCode: `const greeting: string = "Hello, World!";
+console.log(greeting);
+`,
+  },
+  {
+    id: "sqlite-3",
+    name: "SQLite (3.45)",
+    shortName: "SQLite",
+    version: "3.45",
+    type: "DATABASE",
+    fileExtension: ".sql",
+    fileName: "query.sql",
+    monacoLanguage: "sql",
+    compiled: false,
+    popular: false,
+    tag: "v3.45",
+    color: "#003B57",
+    bgLight: "bg-sky-600/10",
+    borderColor: "border-sky-600/30",
+    aliases: ["sqlite", "sqlite3"],
+    defaultStarterCode: `SELECT 'Hello, World!' AS message;
+`,
+  },
 ]
 
 export function getLanguageMeta(
