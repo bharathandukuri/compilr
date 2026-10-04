@@ -3,6 +3,9 @@ package com.bharathandukuri.compilr.compiler.exception;
 import com.bharathandukuri.compilr.execution.exception.DockerException;
 import com.bharathandukuri.compilr.execution.exception.IsolateException;
 import com.bharathandukuri.compilr.language.exception.LanguageNotFoundException;
+import com.bharathandukuri.compilr.protection.queue.CapacityUnavailableException;
+import com.bharathandukuri.compilr.protection.queue.ExecutionQueueTimeoutException;
+import com.bharathandukuri.compilr.protection.ratelimit.RateLimitExceededException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -53,6 +56,60 @@ public class GlobalExceptionHandler {
     ) {
         log.warn("Output limit exceeded on [{}]: {}", request.getRequestURI(), ex.getMessage());
         return buildResponse(HttpStatus.PAYLOAD_TOO_LARGE, ex.getMessage(), request.getRequestURI());
+    }
+
+    @ExceptionHandler(RateLimitExceededException.class)
+    public ResponseEntity<ErrorResponse> handleRateLimitExceeded(
+            RateLimitExceededException ex,
+            HttpServletRequest request
+    ) {
+        log.warn("Rate limit exceeded on [{}]: {}", request.getRequestURI(), ex.getMessage());
+        ErrorResponse errorResponse = ErrorResponse.builder()
+                .timestamp(Instant.now())
+                .status(HttpStatus.TOO_MANY_REQUESTS.value())
+                .error(HttpStatus.TOO_MANY_REQUESTS.getReasonPhrase())
+                .message(ex.getMessage())
+                .path(request.getRequestURI())
+                .build();
+        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
+                .header("Retry-After", String.valueOf(ex.getRetryAfterSeconds()))
+                .body(errorResponse);
+    }
+
+    @ExceptionHandler(CapacityUnavailableException.class)
+    public ResponseEntity<ErrorResponse> handleCapacityUnavailable(
+            CapacityUnavailableException ex,
+            HttpServletRequest request
+    ) {
+        log.warn("Capacity unavailable on [{}]: {}", request.getRequestURI(), ex.getMessage());
+        ErrorResponse errorResponse = ErrorResponse.builder()
+                .timestamp(Instant.now())
+                .status(HttpStatus.SERVICE_UNAVAILABLE.value())
+                .error(HttpStatus.SERVICE_UNAVAILABLE.getReasonPhrase())
+                .message(ex.getMessage())
+                .path(request.getRequestURI())
+                .build();
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                .header("Retry-After", "5")
+                .body(errorResponse);
+    }
+
+    @ExceptionHandler(ExecutionQueueTimeoutException.class)
+    public ResponseEntity<ErrorResponse> handleQueueTimeout(
+            ExecutionQueueTimeoutException ex,
+            HttpServletRequest request
+    ) {
+        log.warn("Queue timeout on [{}]: {}", request.getRequestURI(), ex.getMessage());
+        return buildResponse(HttpStatus.GATEWAY_TIMEOUT, ex.getMessage(), request.getRequestURI());
+    }
+
+    @ExceptionHandler(ExecutionTimeoutException.class)
+    public ResponseEntity<ErrorResponse> handleExecutionTimeout(
+            ExecutionTimeoutException ex,
+            HttpServletRequest request
+    ) {
+        log.warn("Execution timeout on [{}]: {}", request.getRequestURI(), ex.getMessage());
+        return buildResponse(HttpStatus.GATEWAY_TIMEOUT, ex.getMessage(), request.getRequestURI());
     }
 
     @ExceptionHandler(DockerUnavailableException.class)

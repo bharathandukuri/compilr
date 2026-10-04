@@ -18,22 +18,49 @@ import com.bharathandukuri.compilr.language.Language;
 import com.bharathandukuri.compilr.language.LanguageType;
 import com.bharathandukuri.compilr.language.exception.LanguageNotFoundException;
 import com.bharathandukuri.compilr.language.registry.LanguageRegistry;
-import lombok.RequiredArgsConstructor;
+import com.bharathandukuri.compilr.redis.service.RedisService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.List;
 import java.util.UUID;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
 public class CompilerServiceImpl implements CompilerService {
+
+    private static final String CACHE_LANGUAGES_ALL = "compilr:cache:languages:all";
+    private static final String CACHE_LANGUAGE_PREFIX = "compilr:cache:language:";
+    private static final Duration LANGUAGE_CACHE_TTL = Duration.ofHours(1);
 
     private final CodeExecutionService codeExecutionService;
     private final LanguageRegistry languageRegistry;
     private final CompilerProperties compilerProperties;
+    private final RedisService redisService;
+
+    public CompilerServiceImpl(
+            CodeExecutionService codeExecutionService,
+            LanguageRegistry languageRegistry,
+            CompilerProperties compilerProperties
+    ) {
+        this(codeExecutionService, languageRegistry, compilerProperties, null);
+    }
+
+    @Autowired
+    public CompilerServiceImpl(
+            CodeExecutionService codeExecutionService,
+            LanguageRegistry languageRegistry,
+            CompilerProperties compilerProperties,
+            @Autowired(required = false) RedisService redisService
+    ) {
+        this.codeExecutionService = codeExecutionService;
+        this.languageRegistry = languageRegistry;
+        this.compilerProperties = compilerProperties;
+        this.redisService = redisService;
+    }
 
     @Override
     public ExecuteResponse execute(ExecuteRequest request) {
@@ -119,9 +146,31 @@ public class CompilerServiceImpl implements CompilerService {
 
     @Override
     public List<LanguageResponse> getSupportedLanguages() {
-        return languageRegistry.getAll().stream()
+        if (redisService != null) {
+            try {
+                @SuppressWarnings("unchecked")
+                List<LanguageResponse> cached = redisService.get(CACHE_LANGUAGES_ALL, List.class);
+                if (cached != null && !cached.isEmpty()) {
+                    return cached;
+                }
+            } catch (Exception e) {
+                log.warn("Failed to get cached languages from Redis: {}", e.getMessage());
+            }
+        }
+
+        List<LanguageResponse> languages = languageRegistry.getAll().stream()
                 .map(this::toResponse)
                 .toList();
+
+        if (redisService != null) {
+            try {
+                redisService.set(CACHE_LANGUAGES_ALL, languages, LANGUAGE_CACHE_TTL);
+            } catch (Exception e) {
+                log.warn("Failed to cache languages in Redis: {}", e.getMessage());
+            }
+        }
+
+        return languages;
     }
 
     @Override
@@ -129,8 +178,31 @@ public class CompilerServiceImpl implements CompilerService {
         if (languageId == null || languageId.isBlank()) {
             throw new InvalidCompilerRequestException("Language ID must not be blank.");
         }
+
+        String cacheKey = CACHE_LANGUAGE_PREFIX + languageId.trim().toLowerCase();
+        if (redisService != null) {
+            try {
+                LanguageResponse cached = redisService.get(cacheKey, LanguageResponse.class);
+                if (cached != null) {
+                    return cached;
+                }
+            } catch (Exception e) {
+                log.warn("Failed to get cached language [{}] from Redis: {}", languageId, e.getMessage());
+            }
+        }
+
         Language language = languageRegistry.get(languageId);
-        return toResponse(language);
+        LanguageResponse response = toResponse(language);
+
+        if (redisService != null) {
+            try {
+                redisService.set(cacheKey, response, LANGUAGE_CACHE_TTL);
+            } catch (Exception e) {
+                log.warn("Failed to cache language [{}] in Redis: {}", languageId, e.getMessage());
+            }
+        }
+
+        return response;
     }
 
     private LanguageResponse toResponse(Language language) {

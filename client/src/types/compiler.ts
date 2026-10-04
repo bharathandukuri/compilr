@@ -6,6 +6,8 @@ export type ExecutionStatus =
   | "MEMORY_LIMIT_EXCEEDED"
   | "OUTPUT_LIMIT_EXCEEDED"
   | "SYSTEM_ERROR"
+  | "RATE_LIMITED"
+  | "CAPACITY_EXCEEDED"
 
 export interface Language {
   id: string

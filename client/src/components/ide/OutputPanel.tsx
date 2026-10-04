@@ -87,6 +87,20 @@ export const OutputPanel: React.FC<OutputPanelProps> = ({
             <span>Timeout</span>
           </span>
         )
+      case "RATE_LIMITED":
+        return (
+          <span className="flex items-center gap-1 text-[11px] font-medium text-amber-600 dark:text-amber-400">
+            <Clock className="h-3 w-3" />
+            <span>Rate Limited</span>
+          </span>
+        )
+      case "CAPACITY_EXCEEDED":
+        return (
+          <span className="flex items-center gap-1 text-[11px] font-medium text-amber-600 dark:text-amber-400">
+            <AlertTriangle className="h-3 w-3" />
+            <span>Server Busy</span>
+          </span>
+        )
       default:
         return (
           <span className="flex items-center gap-1 text-[11px] font-medium text-rose-500">

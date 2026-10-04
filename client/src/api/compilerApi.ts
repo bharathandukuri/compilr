@@ -1,4 +1,4 @@
-import { apiClient, normalizeError } from "./apiClient"
+import { apiClient, parseCompilerError, normalizeError } from "./apiClient"
 import type { ExecuteRequest, ExecuteResponse, Language } from "@/types/compiler"
 
 export const compilerApi = {
@@ -7,8 +7,7 @@ export const compilerApi = {
       const response = await apiClient.post<ExecuteResponse>("/compiler/execute", request)
       return response.data
     } catch (error) {
-      const message = normalizeError(error)
-      throw new Error(message, { cause: error })
+      throw parseCompilerError(error)
     }
   },
 

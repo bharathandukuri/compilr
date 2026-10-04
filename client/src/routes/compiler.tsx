@@ -17,7 +17,8 @@ import {
 import { useIsMobile } from "@/hooks/use-mobile"
 import { Terminal, Code2 } from "lucide-react"
 import { SUPPORTED_LANGUAGES } from "@/constants/languages"
-import type { ExecuteResponse } from "@/types/compiler"
+import { CompilerApiError } from "@/api/apiClient"
+import type { ExecuteResponse, ExecutionStatus } from "@/types/compiler"
 
 interface CompilerSearchParams {
   lang?: string
@@ -100,15 +101,25 @@ function CompilerPage() {
     })
   }
 
+  const mutationErr = executeMutation.error
+  const errorStatus: ExecutionStatus =
+    mutationErr instanceof CompilerApiError
+      ? mutationErr.status === 429
+        ? "RATE_LIMITED"
+        : mutationErr.status === 503
+        ? "CAPACITY_EXCEEDED"
+        : "SYSTEM_ERROR"
+      : "SYSTEM_ERROR"
+
   const result: ExecuteResponse | null =
     executeMutation.data ??
-    (executeMutation.error
+    (mutationErr
       ? {
-          executionId: "err-system",
+          executionId: "err-" + (mutationErr instanceof CompilerApiError ? mutationErr.status : "system"),
           language: activeLanguage.id,
-          status: "SYSTEM_ERROR",
-          stderr: executeMutation.error.message,
-          error: executeMutation.error.message,
+          status: errorStatus,
+          stderr: mutationErr.message,
+          error: mutationErr.message,
         }
       : null)
 
