@@ -49,7 +49,9 @@ bash "${SCRIPT_DIR}/build-execution-images.sh"
 # 5. Build and launch Docker Compose services
 echo ""
 echo "Building and starting Compilr services (Client: 6990, Server: 6991, Redis: 6992)..."
-docker compose up -d --build
+docker compose --build server
+docker compose --build client
+docker compose up
 
 # 6. Verification and status display
 echo ""
