@@ -51,7 +51,7 @@ echo ""
 echo "Building and starting Compilr services (Client: 6990, Server: 6991, Redis: 6992)..."
 docker compose build server
 docker compose build client
-docker compose up
+docker compose up -d
 
 # 6. Verification and status display
 echo ""
