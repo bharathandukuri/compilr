@@ -11,6 +11,7 @@ import com.bharathandukuri.compilr.execution.dto.response.DockerExecutionResult;
 import com.bharathandukuri.compilr.execution.dto.response.IsolateExecutionResult;
 import com.bharathandukuri.compilr.execution.dto.response.SimpleCodeExecutionResult;
 import com.bharathandukuri.compilr.execution.enums.CodeExecutionStatus;
+import com.bharathandukuri.compilr.execution.exception.DockerExecutionException;
 import com.bharathandukuri.compilr.execution.mapper.CodeExecutionStatusMapper;
 import com.bharathandukuri.compilr.execution.service.CodeExecutionService;
 import com.bharathandukuri.compilr.execution.service.DockerExecutionService;
@@ -269,6 +270,14 @@ public class CodeExecutionServiceImpl implements CodeExecutionService {
 
         long deadline = System.currentTimeMillis() + 15000L;
         while (System.currentTimeMillis() < deadline) {
+            if (!dockerExecutionService.isContainerRunning(containerId)) {
+                String containerLogs = dockerExecutionService.getContainerLogs(containerId, 50);
+                log.error("Database container [{}] stopped unexpectedly for language [{}]. Container logs:\n{}",
+                        containerId, language != null ? language.id() : "unknown", containerLogs);
+                throw new DockerExecutionException("Database container stopped unexpectedly: "
+                        + (containerLogs.isBlank() ? "container exited with non-zero status" : containerLogs));
+            }
+
             try {
                 DockerExecutionResult result = dockerExecutionService.execContainer(containerId, readyCmd);
                 if (result != null && result.exitCode() == 0L) {

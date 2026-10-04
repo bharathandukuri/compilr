@@ -47,6 +47,10 @@ public interface DockerExecutionService {
 
     boolean isContainerExists(String containerId);
 
+    boolean isContainerRunning(String containerId);
+
+    String getContainerLogs(String containerId, int tailLines);
+
     void startContainer(String containerId) throws DockerContainerNotFoundException;
 
     void stopContainer(String containerId)

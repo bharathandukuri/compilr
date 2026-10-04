@@ -14,6 +14,7 @@ import com.github.dockerjava.api.command.BuildImageResultCallback;
 import com.github.dockerjava.api.command.CreateContainerCmd;
 import com.github.dockerjava.api.command.CreateContainerResponse;
 import com.github.dockerjava.api.command.ExecCreateCmdResponse;
+import com.github.dockerjava.api.command.InspectContainerResponse;
 import com.github.dockerjava.api.exception.NotFoundException;
 import com.github.dockerjava.api.model.BuildResponseItem;
 import com.github.dockerjava.api.model.Frame;
@@ -344,6 +345,39 @@ public class DockerExecutionServiceImpl implements DockerExecutionService {
 
         } catch (NotFoundException e) {
             return false;
+        }
+    }
+
+    @Override
+    public boolean isContainerRunning(String containerId) {
+        try {
+            InspectContainerResponse response = dockerClient.inspectContainerCmd(containerId).exec();
+            return response != null && response.getState() != null && Boolean.TRUE.equals(response.getState().getRunning());
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    @Override
+    public String getContainerLogs(String containerId, int tailLines) {
+        try {
+            StringBuilder sb = new StringBuilder();
+            dockerClient.logContainerCmd(containerId)
+                    .withStdOut(true)
+                    .withStdErr(true)
+                    .withTail(tailLines)
+                    .exec(new ResultCallback.Adapter<Frame>() {
+                        @Override
+                        public void onNext(Frame frame) {
+                            if (frame != null && frame.getPayload() != null) {
+                                sb.append(new String(frame.getPayload(), StandardCharsets.UTF_8));
+                            }
+                        }
+                    })
+                    .awaitCompletion(2, TimeUnit.SECONDS);
+            return sb.toString().trim();
+        } catch (Exception e) {
+            return "Unable to retrieve container logs: " + e.getMessage();
         }
     }
 
