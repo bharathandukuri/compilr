@@ -63,37 +63,64 @@ public class SlidingWindowRateLimiter implements RateLimiter {
         checkInMemorySlidingWindow(clientIdentifier, maxRequests, windowMs, now);
     }
 
+    private static final org.springframework.data.redis.core.script.RedisScript<java.util.List> RATE_LIMIT_LUA_SCRIPT =
+            new org.springframework.data.redis.core.script.DefaultRedisScript<>(
+                    """
+                    local key = KEYS[1]
+                    local now = tonumber(ARGV[1])
+                    local windowStart = tonumber(ARGV[2])
+                    local maxRequests = tonumber(ARGV[3])
+                    local ttlSeconds = tonumber(ARGV[4])
+                    local member = ARGV[5]
+
+                    redis.call('ZREMRANGEBYSCORE', key, 0, windowStart)
+                    local currentCount = redis.call('ZCARD', key)
+
+                    if currentCount >= maxRequests then
+                        local oldest = redis.call('ZRANGE', key, 0, 0, 'WITHSCORES')
+                        if oldest and #oldest >= 2 then
+                            return {0, tonumber(oldest[2])}
+                        else
+                            return {0, now}
+                        end
+                    end
+
+                    redis.call('ZADD', key, now, member)
+                    redis.call('EXPIRE', key, ttlSeconds)
+                    return {1, currentCount + 1}
+                    """,
+                    java.util.List.class
+            );
+
     private void checkRedisSlidingWindow(String clientIdentifier, int maxRequests, long windowMs, long now) {
         String key = REDIS_RATE_LIMIT_PREFIX + clientIdentifier;
         long windowStart = now - windowMs;
-
-        // Prune expired entries outside current sliding window
-        stringRedisTemplate.opsForZSet().removeRangeByScore(key, 0, (double) windowStart);
-
-        Long currentCount = stringRedisTemplate.opsForZSet().zCard(key);
-        if (currentCount != null && currentCount >= maxRequests) {
-            // Find oldest timestamp in current window to calculate retry-after
-            Set<ZSetOperations.TypedTuple<String>> oldestTuples =
-                    stringRedisTemplate.opsForZSet().rangeWithScores(key, 0, 0);
-
-            long oldestTimestamp = now;
-            if (oldestTuples != null && !oldestTuples.isEmpty()) {
-                Double score = oldestTuples.iterator().next().getScore();
-                if (score != null) {
-                    oldestTimestamp = score.longValue();
-                }
-            }
-
-            long retryAfterSeconds = Math.max(1, ((oldestTimestamp + windowMs) - now + 999) / 1000);
-            log.warn("Rate limit exceeded for client [{}] (Redis: {}/{} reqs in {}s, retry after {}s)",
-                    clientIdentifier, currentCount, maxRequests, windowMs / 1000, retryAfterSeconds);
-            throw new RateLimitExceededException(clientIdentifier, retryAfterSeconds);
-        }
-
-        // Add current execution timestamp
+        long ttlSeconds = Math.max(60L, (windowMs * 2) / 1000L);
         String member = now + ":" + UUID.randomUUID();
-        stringRedisTemplate.opsForZSet().add(key, member, (double) now);
-        stringRedisTemplate.expire(key, Duration.ofMillis(windowMs * 2));
+
+        java.util.List<?> result = stringRedisTemplate.execute(
+                RATE_LIMIT_LUA_SCRIPT,
+                java.util.List.of(key),
+                String.valueOf(now),
+                String.valueOf(windowStart),
+                String.valueOf(maxRequests),
+                String.valueOf(ttlSeconds),
+                member
+        );
+
+        if (result != null && !result.isEmpty()) {
+            Number allowed = (Number) result.get(0);
+            if (allowed != null && allowed.longValue() == 0L) {
+                long oldestTimestamp = now;
+                if (result.size() >= 2 && result.get(1) instanceof Number num) {
+                    oldestTimestamp = num.longValue();
+                }
+                long retryAfterSeconds = Math.max(1, ((oldestTimestamp + windowMs) - now + 999) / 1000);
+                log.warn("Rate limit exceeded for client [{}] (Redis: max {} reqs in {}s, retry after {}s)",
+                        clientIdentifier, maxRequests, windowMs / 1000, retryAfterSeconds);
+                throw new RateLimitExceededException(clientIdentifier, retryAfterSeconds);
+            }
+        }
     }
 
     private void checkInMemorySlidingWindow(String clientIdentifier, int maxRequests, long windowMs, long now) {

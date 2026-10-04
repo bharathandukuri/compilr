@@ -34,8 +34,17 @@ public interface Language {
             case "cpp-23" -> "23 (GCC 14)";
             case "python-3.12" -> "3.12 (CPython)";
             case "javascript-node-20" -> "20 (Node.js)";
+            case "typescript-5.4" -> "5.4 (Node.js 20)";
+            case "go-1.22" -> "1.22";
+            case "rust-1.75" -> "1.75";
+            case "php-8.3" -> "8.3";
+            case "csharp-12" -> "12 (.NET 8.0)";
+            case "kotlin-1.9" -> "1.9";
+            case "dart-3.4" -> "3.4";
             case "mysql-8.0" -> "8.0";
             case "postgresql-16" -> "16";
+            case "sqlite-3" -> "3.45";
+            case "mongodb-8.0" -> "8.0";
             default -> "latest";
         };
     }
@@ -47,8 +56,17 @@ public interface Language {
             case "cpp-23" -> List.of("cpp", "c++", "cpp23");
             case "python-3.12" -> List.of("python", "py", "python3", "python312");
             case "javascript-node-20" -> List.of("javascript", "js", "node", "nodejs");
+            case "typescript-5.4" -> List.of("typescript", "ts", "typescript-node");
+            case "go-1.22" -> List.of("go", "golang");
+            case "rust-1.75" -> List.of("rust", "rs");
+            case "php-8.3" -> List.of("php");
+            case "csharp-12" -> List.of("csharp", "c#", "cs", "dotnet");
+            case "kotlin-1.9" -> List.of("kotlin", "kt");
+            case "dart-3.4" -> List.of("dart");
             case "mysql-8.0" -> List.of("mysql", "sql");
             case "postgresql-16" -> List.of("postgres", "postgresql", "psql");
+            case "sqlite-3" -> List.of("sqlite", "sqlite3");
+            case "mongodb-8.0" -> List.of("mongodb", "mongo");
             default -> List.of();
         };
     }
@@ -116,11 +134,60 @@ public interface Language {
                     console.log('Hello, World!');
                 }
                 """;
+            case "typescript-5.4" -> """
+                const greeting: string = "Hello, World!";
+                console.log(greeting);
+                """;
+            case "go-1.22" -> """
+                package main
+
+                import "fmt"
+
+                func main() {
+                    fmt.Println("Hello, World!")
+                }
+                """;
+            case "rust-1.75" -> """
+                fn main() {
+                    println!("Hello, World!");
+                }
+                """;
+            case "php-8.3" -> """
+                <?php
+                echo "Hello, World!\\n";
+                """;
+            case "csharp-12" -> """
+                using System;
+
+                class Program {
+                    static void Main(string[] args) {
+                        Console.WriteLine("Hello, World!");
+                    }
+                }
+                """;
+            case "kotlin-1.9" -> """
+                fun main() {
+                    println("Hello, World!")
+                }
+                """;
+            case "dart-3.4" -> """
+                void main() {
+                  print('Hello, World!');
+                }
+                """;
             case "mysql-8.0" -> """
                 SELECT 'Hello, World!' AS message;
                 """;
             case "postgresql-16" -> """
                 SELECT 'Hello, World!' AS message;
+                """;
+            case "sqlite-3" -> """
+                SELECT 'Hello, World!' AS message;
+                """;
+            case "mongodb-8.0" -> """
+                db.items.insertOne({ message: "Hello, World!" });
+                const item = db.items.findOne();
+                printjson(item);
                 """;
             default -> "// Write your code here\n";
         };

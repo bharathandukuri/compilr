@@ -50,7 +50,7 @@ Compilr solves the challenge of executing arbitrary, untrusted user code in real
 
 ---
 
-## 3. Supported Languages
+## 3. Supported Languages & Environments
 
 | Language | Identifier | Version | Paradigm | Compiler / Runtime | Default File |
 | :--- | :--- | :--- | :--- | :--- | :--- |
@@ -59,8 +59,17 @@ Compilr solves the challenge of executing arbitrary, untrusted user code in real
 | **C++** | `cpp-23` (alias: `cpp`, `c++`) | C++23 (GCC 14) | Compiled | `g++ -std=c++23 -O2` | `main.cpp` |
 | **Python** | `python-3.12` (alias: `python`, `py`) | CPython 3.12 | Interpreted | `python3` | `main.py` |
 | **JavaScript** | `javascript-node-20` (alias: `js`, `node`) | Node.js 20 | Interpreted | `node` | `main.js` |
+| **TypeScript** | `typescript-5.4` (alias: `ts`) | TypeScript 5.4 | Interpreted | `ts-node` (Node.js 20) | `main.ts` |
+| **Go** | `go-1.22` (alias: `go`, `golang`) | Go 1.22 | Compiled | `go build` | `main.go` |
+| **Rust** | `rust-1.75` (alias: `rust`, `rs`) | Rust 1.75 | Compiled | `rustc -O` | `main.rs` |
+| **C#** | `csharp-12` (alias: `c#`, `dotnet`) | .NET 8.0 | Compiled | `dotnet run` | `Program.cs` |
+| **Kotlin** | `kotlin-1.9` (alias: `kt`) | Kotlin 1.9 | Compiled | `kotlinc` & `java` | `Main.kt` |
+| **Dart** | `dart-3.4` (alias: `dart`) | Dart 3.4 | Interpreted | `dart run` | `main.dart` |
+| **PHP** | `php-8.3` (alias: `php`) | PHP 8.3 | Interpreted | `php` | `main.php` |
 | **PostgreSQL**| `postgresql-16` (alias: `postgres`, `psql`) | PostgreSQL 16 | Database | `psql` | `main.sql` |
 | **MySQL** | `mysql-8.0` (alias: `mysql`, `sql`) | MySQL 8.0 | Database | `mysql` | `main.sql` |
+| **SQLite** | `sqlite-3` (alias: `sqlite`, `sqlite3`) | SQLite 3.45 | Database | `sqlite3` | `main.sql` |
+| **MongoDB** | `mongodb-8.0` (alias: `mongo`, `nosql`) | MongoDB 8.0 | Database | `mongosh` | `main.js` |
 
 ---
 
@@ -229,20 +238,67 @@ Open `http://localhost:5173` in your browser. The Vite dev server will proxy `/a
 
 ---
 
-## 8. Production Deployment with Docker Compose
+## 8. Production Deployment with Docker Compose (VPS Ready)
 
-To start both the frontend and backend in production mode:
+### 8.1 Exposed Ports Architecture
+| Service | Container | Host Exposed Port | URL / Access | Description |
+| :--- | :--- | :--- | :--- | :--- |
+| **Client** | `compilr-client` | **`6990`** | `http://<vps-ip>:6990` | Production React SPA served via optimized Nginx |
+| **Server** | `compilr-server` | **`6991`** | `http://<vps-ip>:6991` | Spring Boot 4 REST API, Health & Swagger Docs |
+| **Redis** | `compilr-redis` | **`6992`** | `localhost:6992` | Redis 7 for rate-limiting, job queueing & token cache |
 
+### 8.2 Security: Network Isolation Guarantees
+* **No Default Bridge for Sandboxes**: User-submitted code execution containers **never** use the default Docker `bridge` network (`docker0`).
+* **Complete Network Denial (`networkMode: none`)**: By default, all compiler sandboxes and database evaluation containers run with `--net=none` and `networkDisabled=true`. They possess no external network interfaces (only loopback `127.0.0.1`).
+* **Isolated Internal Sandbox Network**: If networking is ever required, containers attach to `compilr-sandbox-net` (created with `--internal`), which has no default gateway to the host and cannot communicate with the host's exposed ports (`6990`, `6991`, `6992`).
+* **Application Network Isolation**: The client, server, and Redis communicate via a dedicated user-defined network (`compilr-app-net`).
+
+### 8.3 One-Command VPS Deployment
+Run the automated deployment script:
+```bash
+chmod +x scripts/deploy.sh
+./scripts/deploy.sh
+```
+
+### 8.4 Manual Deployment Step-by-Step
+
+#### 1. Configure Environment
+```bash
+cp .env.example .env
+# Edit .env if you wish to customize passwords or limits:
+nano .env
+```
+
+#### 2. Build Sandbox Execution Images (All 17 Environments)
+```bash
+chmod +x scripts/build-execution-images.sh
+./scripts/build-execution-images.sh
+```
+Verify images:
+```bash
+docker images 'execution/*'
+```
+
+#### 3. Start Production Services
 ```bash
 docker compose up -d --build
 ```
 
-* **Web IDE Application**: `http://localhost:3000`
-* **Backend API Gateway**: `http://localhost:8080`
-* **Swagger Documentation**: `http://localhost:8080/swagger-ui.html`
-
-To stop the services:
+#### 4. Verify Service Health
 ```bash
+docker compose ps
+curl http://localhost:6991/api/v1/compiler/health
+```
+
+#### 5. View Logs or Stop Stack
+```bash
+# Stream live logs
+docker compose logs -f
+
+# View specific service logs
+docker compose logs -f server
+
+# Stop all services safely
 docker compose down
 ```
 

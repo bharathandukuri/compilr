@@ -23,7 +23,7 @@ FROM eclipse-temurin:25-jre
 
 WORKDIR /app
 
-# Install docker CLI to allow diagnostic execution if needed
+# Install curl and certificates for healthchecks
 RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     ca-certificates \
@@ -33,11 +33,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY --from=builder /build/target/compilr-*.jar app.jar
 
 ENV SERVER_PORT=8080 \
-    COMPILR_EXECUTION_DOCKER_HOST=unix:///var/run/docker.sock
+    COMPILR_EXECUTION_DOCKER_HOST=unix:///var/run/docker.sock \
+    SPRING_DATA_REDIS_HOST=redis \
+    SPRING_DATA_REDIS_PORT=6379
 
 EXPOSE 8080
 
-HEALTHCHECK --interval=15s --timeout=5s --start-period=20s --retries=3 \
+HEALTHCHECK --interval=15s --timeout=5s --start-period=30s --retries=3 \
   CMD curl -f http://localhost:8080/api/v1/compiler/health || exit 1
 
-ENTRYPOINT ["java", "-jar", "app.jar"]
+ENTRYPOINT ["java", "-XX:+UseContainerSupport", "-XX:MaxRAMPercentage=75.0", "-Djava.security.egd=file:/dev/./urandom", "-jar", "app.jar"]

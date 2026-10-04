@@ -29,15 +29,24 @@ class LanguageRegistryTest {
     @DisplayName("init: registers all standard languages")
     void init_registersAllStandardLanguages() {
         List<Language> all = languageRegistry.getAll();
-        assertThat(all).hasSize(7);
+        assertThat(all).hasSize(16);
 
         assertThat(languageRegistry.isSupported("java-21")).isTrue();
         assertThat(languageRegistry.isSupported("c-17")).isTrue();
         assertThat(languageRegistry.isSupported("cpp-23")).isTrue();
         assertThat(languageRegistry.isSupported("python-3.12")).isTrue();
         assertThat(languageRegistry.isSupported("javascript-node-20")).isTrue();
+        assertThat(languageRegistry.isSupported("typescript-5.4")).isTrue();
+        assertThat(languageRegistry.isSupported("go-1.22")).isTrue();
+        assertThat(languageRegistry.isSupported("rust-1.75")).isTrue();
+        assertThat(languageRegistry.isSupported("php-8.3")).isTrue();
+        assertThat(languageRegistry.isSupported("csharp-12")).isTrue();
+        assertThat(languageRegistry.isSupported("kotlin-1.9")).isTrue();
+        assertThat(languageRegistry.isSupported("dart-3.4")).isTrue();
         assertThat(languageRegistry.isSupported("mysql-8.0")).isTrue();
         assertThat(languageRegistry.isSupported("postgresql-16")).isTrue();
+        assertThat(languageRegistry.isSupported("sqlite-3")).isTrue();
+        assertThat(languageRegistry.isSupported("mongodb-8.0")).isTrue();
     }
 
     @Test
@@ -58,10 +67,37 @@ class LanguageRegistryTest {
         Language js = languageRegistry.get("js");
         assertThat(js.id()).isEqualTo("javascript-node-20");
 
-        Language sql = languageRegistry.get("sql");
+        Language ts = languageRegistry.get("ts");
+        assertThat(ts.id()).isEqualTo("typescript-5.4");
+
+        Language go = languageRegistry.get("golang");
+        assertThat(go.id()).isEqualTo("go-1.22");
+
+        Language rust = languageRegistry.get("rs");
+        assertThat(rust.id()).isEqualTo("rust-1.75");
+
+        Language php = languageRegistry.get("php");
+        assertThat(php.id()).isEqualTo("php-8.3");
+
+        Language csharp = languageRegistry.get("c#");
+        assertThat(csharp.id()).isEqualTo("csharp-12");
+
+        Language kotlin = languageRegistry.get("kt");
+        assertThat(kotlin.id()).isEqualTo("kotlin-1.9");
+
+        Language dart = languageRegistry.get("dart");
+        assertThat(dart.id()).isEqualTo("dart-3.4");
+
+        Language sqlite = languageRegistry.get("sqlite3");
+        assertThat(sqlite.id()).isEqualTo("sqlite-3");
+
+        Language mongo = languageRegistry.get("mongo");
+        assertThat(mongo.id()).isEqualTo("mongodb-8.0");
+
+        Language sql = languageRegistry.get("mysql");
         assertThat(sql.id()).isEqualTo("mysql-8.0");
 
-        Language postgres = languageRegistry.get("psql");
+        Language postgres = languageRegistry.get("postgresql");
         assertThat(postgres.id()).isEqualTo("postgresql-16");
     }
 

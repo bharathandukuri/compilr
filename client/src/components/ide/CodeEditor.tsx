@@ -55,6 +55,33 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
     }
     tsDefaults.setCompilerOptions(compilerOptions)
     jsDefaults.setCompilerOptions(compilerOptions)
+
+    // Mongosh ambient globals for JavaScript highlighting & autocomplete
+    jsDefaults.addExtraLib(
+      `
+      declare const db: {
+        [collection: string]: {
+          find(query?: any, projection?: any): any;
+          findOne(query?: any, projection?: any): any;
+          insertOne(doc: any, options?: any): any;
+          insertMany(docs: any[], options?: any): any;
+          updateOne(filter: any, update: any, options?: any): any;
+          updateMany(filter: any, update: any, options?: any): any;
+          deleteOne(filter: any, options?: any): any;
+          deleteMany(filter: any, options?: any): any;
+          countDocuments(query?: any, options?: any): any;
+          aggregate(pipeline?: any[], options?: any): any;
+          drop(): any;
+          [method: string]: any;
+        };
+      };
+      declare function printjson(...args: any[]): void;
+      declare function print(...args: any[]): void;
+      declare function ObjectId(id?: string): any;
+      declare function ISODate(date?: string): any;
+      `,
+      "ts:mongodb-globals.d.ts"
+    )
   }
 
   const handleEditorMount: OnMount = (editor, monacoInstance: Monaco) => {
@@ -79,10 +106,19 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
         editor.getAction("editor.action.formatDocument")?.run()
       }
     )
+
+    // For MongoDB, explicitly ensure the model language is registered as javascript
+    const model = editor.getModel()
+    if (model) {
+      const isMongo = langMeta.id.includes("mongo") || langMeta.monacoLanguage === "mongodb"
+      if (isMongo) {
+        monacoInstance.editor.setModelLanguage(model, "javascript")
+      }
+    }
   }
 
-  // Clear existing markers whenever the active language changes
-  // to prevent errors from one language lingering on another
+  // Clear existing markers and sync model language whenever the active language changes
+  // to prevent errors from one language lingering on another (and ensure MongoDB -> javascript)
   useEffect(() => {
     if (monacoRef.current) {
       monacoRef.current.editor.removeAllMarkers?.()
@@ -93,10 +129,14 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
           markers.forEach((m: monaco.editor.IMarker) => {
             monacoRef.current?.editor.setModelMarkers(model, m.owner, [])
           })
+
+          const isMongo = langMeta.id.includes("mongo") || langMeta.monacoLanguage === "mongodb"
+          const targetLanguage = isMongo ? "javascript" : langMeta.monacoLanguage
+          monacoRef.current.editor.setModelLanguage(model, targetLanguage)
         }
       }
     }
-  }, [language?.id])
+  }, [language?.id, langMeta.monacoLanguage, langMeta.id])
 
   // Update editor settings dynamically from Zustand store
   useEffect(() => {
@@ -116,6 +156,9 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
       typeof window !== "undefined" &&
       window.matchMedia("(prefers-color-scheme: dark)").matches)
 
+  const isMongo = langMeta.id.includes("mongo") || langMeta.monacoLanguage === "mongodb"
+  const editorLanguage = isMongo ? "javascript" : langMeta.monacoLanguage
+
   return (
     <div className="flex h-full w-full flex-col bg-background overflow-hidden">
       {/* Compact Editor Header */}
@@ -132,7 +175,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
           height="100%"
           width="100%"
           path={`${language?.id || "default"}/${langMeta.fileName}`}
-          language={langMeta.monacoLanguage}
+          language={editorLanguage}
           theme={isDark ? "vs-dark" : "light"}
           value={code}
           beforeMount={handleBeforeMount}

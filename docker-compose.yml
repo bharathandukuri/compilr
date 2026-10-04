@@ -1,37 +1,85 @@
 services:
-  backend:
-    build:
-      context: ./server
-      dockerfile: Dockerfile
-    container_name: compilr-backend
-    ports:
-      - "8080:8080"
-    environment:
-      - SERVER_PORT=8080
-      - COMPILR_EXECUTION_DOCKER_HOST=unix:///var/run/docker.sock
-      - COMPILR_COMPILER_DEFAULT_TIME_LIMIT_MS=5000
-      - COMPILR_COMPILER_MAX_TIME_LIMIT_MS=15000
-      - COMPILR_COMPILER_DEFAULT_MEMORY_LIMIT_KB=262144
-    volumes:
-      # Mount host docker socket to allow backend to launch sandbox containers
-      - /var/run/docker.sock:/var/run/docker.sock
-    restart: unless-stopped
-    networks:
-      - compilr-network
-
-  frontend:
+  client:
     build:
       context: ./client
       dockerfile: Dockerfile
-    container_name: compilr-frontend
+    container_name: compilr-client
     ports:
-      - "3000:80"
+      - "${CLIENT_PORT:-6990}:80"
+    environment:
+      - VITE_API_BASE_URL=/api/v1
     depends_on:
-      - backend
+      server:
+        condition: service_healthy
     restart: unless-stopped
     networks:
-      - compilr-network
+      - compilr-app-net
+
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: compilr-server
+    ports:
+      - "${SERVER_PORT:-6991}:8080"
+    environment:
+      - SERVER_PORT=8080
+      - SPRING_DATA_REDIS_HOST=redis
+      - SPRING_DATA_REDIS_PORT=6379
+      - SPRING_DATA_REDIS_PASSWORD=${REDIS_PASSWORD:-stacked_redis_secret}
+      - COMPILR_EXECUTION_DOCKER_HOST=unix:///var/run/docker.sock
+      - COMPILR_EXECUTION_DOCKER_ENABLED=true
+      - COMPILR_COMPILER_DEFAULT_TIME_LIMIT_MS=${COMPILR_COMPILER_DEFAULT_TIME_LIMIT_MS:-5000}
+      - COMPILR_COMPILER_MAX_TIME_LIMIT_MS=${COMPILR_COMPILER_MAX_TIME_LIMIT_MS:-15000}
+      - COMPILR_COMPILER_DEFAULT_MEMORY_LIMIT_KB=${COMPILR_COMPILER_DEFAULT_MEMORY_LIMIT_KB:-262144}
+      - LOGGING_LEVEL_COM_BHARATHANDUKURI_COMPILR=${LOG_LEVEL:-INFO}
+    volumes:
+      # Mount host docker socket to allow backend to launch isolated execution sandbox containers
+      - /var/run/docker.sock:/var/run/docker.sock
+    depends_on:
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - compilr-app-net
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/api/v1/compiler/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+
+  redis:
+    image: redis:7-alpine
+    container_name: compilr-redis
+    ports:
+      - "${REDIS_PORT:-6992}:6379"
+    command: >
+      redis-server
+      --requirepass ${REDIS_PASSWORD:-stacked_redis_secret}
+      --appendonly yes
+      --maxmemory 256mb
+      --maxmemory-policy noeviction
+    volumes:
+      - compilr-redis-data:/data
+    restart: unless-stopped
+    networks:
+      - compilr-app-net
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD:-stacked_redis_secret}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
 
 networks:
-  compilr-network:
+  # Isolated application network for client, server, and redis.
+  # Sandbox execution containers are created in network mode 'none' or 'compilr-sandbox-net'
+  # (with internal=true) and cannot reach this network or host exposed ports.
+  compilr-app-net:
+    name: compilr-app-net
     driver: bridge
+
+volumes:
+  compilr-redis-data:
+    name: compilr-redis-data

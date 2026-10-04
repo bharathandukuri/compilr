@@ -16,6 +16,7 @@ import {
   TooltipTrigger,
   TooltipContent,
 } from "@/components/ui/tooltip"
+import { ScrollArea } from "@/components/ui/scroll-area"
 import type { ExecuteResponse, ExecutionStatus } from "@/types/compiler"
 import {
   useActiveOutputTab,
@@ -110,71 +111,73 @@ export const OutputPanel: React.FC<OutputPanelProps> = ({
 
   // Render Output Console content
   const renderOutputConsole = () => (
-    <div className="h-full w-full overflow-auto p-3 font-mono text-xs leading-relaxed select-text">
-      {isRunning ? (
-        <div className="flex h-full flex-col items-center justify-center gap-2 text-muted-foreground">
-          <Loader2 className="h-5 w-5 animate-spin text-primary" />
-          <span className="text-xs">Running code...</span>
-        </div>
-      ) : result ? (
-        <div className="space-y-3">
-          {/* Main Stdout */}
-          {hasStdout && (
-            <pre className="whitespace-pre-wrap break-words text-foreground font-mono">
-              {result.stdout}
-            </pre>
-          )}
+    <ScrollArea className="h-full w-full">
+      <div className="min-h-full p-3 font-mono text-xs leading-relaxed select-text scrollbar-thin">
+        {isRunning ? (
+          <div className="flex h-48 flex-col items-center justify-center gap-2 text-muted-foreground">
+            <Loader2 className="h-5 w-5 animate-spin text-primary" />
+            <span className="text-xs">Running code...</span>
+          </div>
+        ) : result ? (
+          <div className="space-y-3">
+            {/* Main Stdout */}
+            {hasStdout && (
+              <pre className="font-mono break-words whitespace-pre-wrap text-foreground">
+                {result.stdout}
+              </pre>
+            )}
 
-          {/* Stderr / Errors */}
-          {hasStderr && (
-            <div className="rounded border border-rose-500/30 bg-rose-500/10 p-2.5 text-rose-600 dark:text-rose-400">
-              <div className="text-[11px] font-semibold uppercase tracking-wider mb-1">
-                {result.status === "COMPILATION_ERROR"
-                  ? "Compilation Error"
-                  : result.status === "RUNTIME_ERROR"
-                  ? `Runtime Error (exit code ${result.exitCode ?? 1})`
-                  : "Error Output"}
+            {/* Stderr / Errors */}
+            {hasStderr && (
+              <div className="rounded border border-rose-500/30 bg-rose-500/10 p-2.5 text-rose-600 dark:text-rose-400">
+                <div className="mb-1 text-[11px] font-semibold tracking-wider uppercase">
+                  {result.status === "COMPILATION_ERROR"
+                    ? "Compilation Error"
+                    : result.status === "RUNTIME_ERROR"
+                      ? `Runtime Error (exit code ${result.exitCode ?? 1})`
+                      : "Error Output"}
+                </div>
+                <pre className="font-mono text-xs break-words whitespace-pre-wrap">
+                  {result.stderr}
+                </pre>
               </div>
-              <pre className="whitespace-pre-wrap break-words font-mono text-xs">
-                {result.stderr}
-              </pre>
-            </div>
-          )}
+            )}
 
-          {/* General Error (e.g. system or network) */}
-          {result.error && !hasStderr && (
-            <div className="rounded border border-rose-500/30 bg-rose-500/10 p-2.5 text-rose-500">
-              <pre className="whitespace-pre-wrap break-words font-mono text-xs">
-                {result.error}
-              </pre>
-            </div>
-          )}
+            {/* General Error (e.g. system or network) */}
+            {result.error && !hasStderr && (
+              <div className="rounded border border-rose-500/30 bg-rose-500/10 p-2.5 text-rose-500">
+                <pre className="font-mono text-xs break-words whitespace-pre-wrap">
+                  {result.error}
+                </pre>
+              </div>
+            )}
 
-          {/* Empty output case */}
-          {!hasStdout && !hasStderr && !result.error && (
-            <div className="text-muted-foreground italic text-xs py-4 text-center">
-              Program executed with no output.
-            </div>
-          )}
-        </div>
-      ) : (
-        <div className="flex h-full flex-col items-center justify-center text-muted-foreground text-xs py-10">
-          <Terminal className="h-6 w-6 mb-2 opacity-40" />
-          <span>Click Run to execute code</span>
-        </div>
-      )}
-    </div>
+            {/* Empty output case */}
+            {!hasStdout && !hasStderr && !result.error && (
+              <div className="py-4 text-center text-xs text-muted-foreground italic">
+                Program executed with no output.
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className="flex h-48 flex-col items-center justify-center py-10 text-xs text-muted-foreground">
+            <Terminal className="mb-2 h-6 w-6 opacity-40" />
+            <span>Click Run to execute code</span>
+          </div>
+        )}
+      </div>
+    </ScrollArea>
   )
 
   // Render Stdin Input Textarea
   const renderStdinTextarea = () => (
-    <div className="h-full w-full p-2 bg-background">
+    <div className="h-full w-full bg-background p-2">
       <textarea
         value={stdin}
         onChange={(e) => onStdinChange(e.target.value)}
         disabled={isRunning}
         placeholder="Enter standard input here..."
-        className="h-full w-full resize-none rounded bg-transparent p-2.5 font-mono text-xs text-foreground placeholder:text-muted-foreground/60 focus:outline-hidden focus:ring-1 focus:ring-primary/40 border border-border/40"
+        className="h-full w-full resize-none rounded border border-border/40 bg-transparent p-2.5 font-mono text-xs text-foreground placeholder:text-muted-foreground/60 focus:ring-1 focus:ring-primary/40 focus:outline-hidden scrollbar-thin"
         spellCheck={false}
       />
     </div>
@@ -185,10 +188,10 @@ export const OutputPanel: React.FC<OutputPanelProps> = ({
   // =========================================================================
   if (isSplitView) {
     return (
-      <div className="flex h-full w-full flex-col bg-background overflow-hidden border-l">
+      <div className="flex h-full w-full flex-col overflow-hidden border-l bg-background">
         {/* Top Half: Output Pane with its dedicated Output Header */}
         <div className="flex h-1/2 flex-col overflow-hidden border-b">
-          <div className="flex h-8 shrink-0 items-center justify-between border-b bg-muted/20 px-2 sm:px-3 select-none">
+          <div className="flex h-8 shrink-0 items-center justify-between border-b bg-muted/20 px-2 select-none sm:px-3">
             <div className="flex items-center gap-1.5 text-xs font-semibold text-foreground">
               <Terminal className="h-3.5 w-3.5 text-primary" />
               <span>Output</span>
@@ -196,13 +199,15 @@ export const OutputPanel: React.FC<OutputPanelProps> = ({
 
             <div className="flex items-center gap-2">
               {!isRunning && result && (
-                <div className="flex items-center gap-2 text-[11px] font-mono text-muted-foreground">
+                <div className="flex items-center gap-2 font-mono text-[11px] text-muted-foreground">
                   {getStatusBadge(result.status)}
                   {result.executionTimeMs !== undefined && (
                     <span>{result.executionTimeMs}ms</span>
                   )}
                   {result.memoryUsageKb && (
-                    <span className="hidden sm:inline">· {formatMemory(result.memoryUsageKb)}</span>
+                    <span className="hidden sm:inline">
+                      · {formatMemory(result.memoryUsageKb)}
+                    </span>
                   )}
                 </div>
               )}
@@ -215,7 +220,7 @@ export const OutputPanel: React.FC<OutputPanelProps> = ({
                       variant="ghost"
                       size="icon"
                       onClick={toggleSplitView}
-                      className="h-6 w-6 text-foreground bg-muted hover:bg-muted/80 hidden sm:flex cursor-pointer"
+                      className="hidden h-6 w-6 cursor-pointer bg-muted text-foreground hover:bg-muted/80 sm:flex"
                     >
                       <Columns className="h-3 w-3" />
                     </Button>
@@ -233,7 +238,7 @@ export const OutputPanel: React.FC<OutputPanelProps> = ({
                       size="icon"
                       onClick={onClear}
                       disabled={isRunning || !result}
-                      className="h-6 w-6 text-muted-foreground hover:text-foreground cursor-pointer"
+                      className="h-6 w-6 cursor-pointer text-muted-foreground hover:text-foreground"
                     >
                       <Trash2 className="h-3 w-3" />
                     </Button>
@@ -244,20 +249,15 @@ export const OutputPanel: React.FC<OutputPanelProps> = ({
             </div>
           </div>
 
-          <div className="flex-1 overflow-hidden">
-            {renderOutputConsole()}
-          </div>
+          <div className="flex-1 overflow-hidden">{renderOutputConsole()}</div>
         </div>
 
         {/* Bottom Half: Input Pane with its dedicated Input Header */}
         <div className="flex h-1/2 flex-col overflow-hidden">
-          <div className="flex h-8 shrink-0 items-center justify-between border-b bg-muted/20 px-2 sm:px-3 select-none">
+          <div className="flex h-8 shrink-0 items-center justify-between border-b bg-muted/20 px-2 select-none sm:px-3">
             <div className="flex items-center gap-1.5 text-xs font-semibold text-foreground">
               <CornerDownLeft className="h-3.5 w-3.5 text-primary" />
-              <span>Standard Input</span>
-              <span className="text-[11px] font-normal text-muted-foreground hidden sm:inline">
-                (one argument per line)
-              </span>
+              <span>Input</span>
             </div>
 
             <div className="flex items-center gap-2">
@@ -266,7 +266,7 @@ export const OutputPanel: React.FC<OutputPanelProps> = ({
                   type="button"
                   onClick={() => onStdinChange("")}
                   disabled={isRunning}
-                  className="text-[11px] text-muted-foreground hover:text-foreground cursor-pointer font-medium"
+                  className="cursor-pointer text-[11px] font-medium text-muted-foreground hover:text-foreground"
                 >
                   Clear input
                 </button>
@@ -274,9 +274,7 @@ export const OutputPanel: React.FC<OutputPanelProps> = ({
             </div>
           </div>
 
-          <div className="flex-1 overflow-hidden">
-            {renderStdinTextarea()}
-          </div>
+          <div className="flex-1 overflow-hidden">{renderStdinTextarea()}</div>
         </div>
       </div>
     )
@@ -286,17 +284,17 @@ export const OutputPanel: React.FC<OutputPanelProps> = ({
   // Render Single (Tabbed) Mode
   // =========================================================================
   return (
-    <div className="flex h-full w-full flex-col bg-background overflow-hidden border-l">
+    <div className="flex h-full w-full flex-col overflow-hidden border-l bg-background">
       {/* Top Bar with Navigation Tabs & Actions */}
-      <div className="flex h-8 shrink-0 items-center justify-between border-b bg-muted/20 px-2 sm:px-3 select-none">
+      <div className="flex h-8 shrink-0 items-center justify-between border-b bg-muted/20 px-2 select-none sm:px-3">
         {/* Navigation Tabs */}
         <div className="flex items-center gap-1">
           <button
             type="button"
             onClick={() => setActiveOutputTab("output")}
-            className={`flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded transition-colors cursor-pointer ${
+            className={`flex cursor-pointer items-center gap-1.5 rounded px-2.5 py-1 text-xs font-medium transition-colors ${
               activeTab === "output"
-                ? "bg-background text-foreground shadow-2xs font-semibold"
+                ? "bg-background font-semibold text-foreground shadow-2xs"
                 : "text-muted-foreground hover:text-foreground"
             }`}
           >
@@ -307,9 +305,9 @@ export const OutputPanel: React.FC<OutputPanelProps> = ({
           <button
             type="button"
             onClick={() => setActiveOutputTab("stdin")}
-            className={`flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded transition-colors cursor-pointer ${
+            className={`flex cursor-pointer items-center gap-1.5 rounded px-2.5 py-1 text-xs font-medium transition-colors ${
               activeTab === "stdin"
-                ? "bg-background text-foreground shadow-2xs font-semibold"
+                ? "bg-background font-semibold text-foreground shadow-2xs"
                 : "text-muted-foreground hover:text-foreground"
             }`}
           >
@@ -332,13 +330,15 @@ export const OutputPanel: React.FC<OutputPanelProps> = ({
         <div className="flex items-center gap-2">
           {/* Status summary */}
           {!isRunning && result && activeTab === "output" && (
-            <div className="flex items-center gap-2 text-[11px] font-mono text-muted-foreground">
+            <div className="flex items-center gap-2 font-mono text-[11px] text-muted-foreground">
               {getStatusBadge(result.status)}
               {result.executionTimeMs !== undefined && (
                 <span>{result.executionTimeMs}ms</span>
               )}
               {result.memoryUsageKb && (
-                <span className="hidden sm:inline">· {formatMemory(result.memoryUsageKb)}</span>
+                <span className="hidden sm:inline">
+                  · {formatMemory(result.memoryUsageKb)}
+                </span>
               )}
             </div>
           )}
@@ -351,7 +351,7 @@ export const OutputPanel: React.FC<OutputPanelProps> = ({
                   variant="ghost"
                   size="icon"
                   onClick={toggleSplitView}
-                  className="h-6 w-6 text-muted-foreground hover:text-foreground hidden sm:flex cursor-pointer"
+                  className="hidden h-6 w-6 cursor-pointer text-muted-foreground hover:text-foreground sm:flex"
                 >
                   <Columns className="h-3 w-3" />
                 </Button>
@@ -370,7 +370,7 @@ export const OutputPanel: React.FC<OutputPanelProps> = ({
                     size="icon"
                     onClick={onClear}
                     disabled={isRunning || !result}
-                    className="h-6 w-6 text-muted-foreground hover:text-foreground cursor-pointer"
+                    className="h-6 w-6 cursor-pointer text-muted-foreground hover:text-foreground"
                   >
                     <Trash2 className="h-3 w-3" />
                   </Button>
@@ -387,7 +387,7 @@ export const OutputPanel: React.FC<OutputPanelProps> = ({
                       type="button"
                       onClick={() => onStdinChange("")}
                       disabled={isRunning}
-                      className="text-[11px] text-muted-foreground hover:text-foreground cursor-pointer font-medium"
+                      className="cursor-pointer text-[11px] font-medium text-muted-foreground hover:text-foreground"
                     >
                       Clear input
                     </button>

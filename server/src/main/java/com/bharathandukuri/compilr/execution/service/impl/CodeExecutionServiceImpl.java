@@ -189,10 +189,12 @@ public class CodeExecutionServiceImpl implements CodeExecutionService {
                     timeLimitMs);
             long elapsedMs = (System.nanoTime() - startNanos) / 1_000_000L;
 
+            String cleanStderr = sanitizeDatabaseStderr(execResult.stderr());
+
             CodeExecutionStatus status;
             if (execResult.exitCode() == 0L) {
-                if (execResult.stderr() != null && !execResult.stderr().isBlank()
-                        && (execResult.stderr().contains("ERROR:") || execResult.stderr().contains("ERROR "))) {
+                if (cleanStderr != null && !cleanStderr.isBlank()
+                        && (cleanStderr.contains("ERROR:") || cleanStderr.contains("ERROR "))) {
                     status = CodeExecutionStatus.RUNTIME_ERROR;
                 } else {
                     status = CodeExecutionStatus.SUCCESS;
@@ -205,7 +207,7 @@ public class CodeExecutionServiceImpl implements CodeExecutionService {
 
             return SimpleCodeExecutionResult.builder()
                     .stdout(execResult.stdout())
-                    .stderr(execResult.stderr())
+                    .stderr(cleanStderr)
                     .exitCode(execResult.exitCode())
                     .exitSignal(0L)
                     .executionStatus(status)
@@ -238,13 +240,29 @@ public class CodeExecutionServiceImpl implements CodeExecutionService {
         }
     }
 
+    private String sanitizeDatabaseStderr(String stderr) {
+        if (stderr == null || stderr.isBlank()) {
+            return stderr;
+        }
+        String filtered = stderr.lines()
+                .filter(line -> !line.contains("Using a password on the command line interface can be insecure"))
+                .reduce((a, b) -> a + "\n" + b)
+                .orElse("")
+                .trim();
+        return filtered.isEmpty() ? null : filtered;
+    }
+
     private void waitForDatabaseReady(String containerId, Language language) {
         String langId = language != null && language.id() != null ? language.id().toLowerCase() : "";
         List<String> readyCmd;
         if (langId.contains("postgres")) {
             readyCmd = List.of("psql", "-U", "postgres", "-d", "stacked_judge_db", "-c", "SELECT 1;");
         } else if (langId.contains("mysql")) {
-            readyCmd = List.of("mysql", "-u", "root", "-pstacked_judge", "stacked_judge_db", "-e", "SELECT 1;");
+            readyCmd = List.of("mysql", "-S", "/var/run/mysqld/mysqld.sock", "stacked_judge_db", "-e", "SELECT 1;");
+        } else if (langId.contains("mongo")) {
+            readyCmd = List.of("mongosh", "--quiet", "--eval", "db.adminCommand('ping')");
+        } else if (langId.contains("sqlite")) {
+            return;
         } else {
             return;
         }
@@ -311,12 +329,22 @@ public class CodeExecutionServiceImpl implements CodeExecutionService {
             }
         }
 
-        // JVM and Node.js V8 runtimes pre-allocate large virtual address spaces
+        // Managed runtimes (JVM, V8, Go, CLR, Dart VM) pre-allocate large virtual address spaces
         // for JIT code caches, GC card tables, and pointer compression. Setting RLIMIT_AS (--mem)
-        // starves virtual address space and causes initialization crash.
+        // starves virtual address space and causes initialization crashes.
         String langId = language != null && language.id() != null ? language.id().toLowerCase() : "";
-        if (langId.contains("java") || langId.contains("node") || langId.contains("javascript")) {
+        if (langId.contains("java") || langId.contains("node") || langId.contains("javascript")
+                || langId.contains("kotlin") || langId.contains("typescript")
+                || langId.contains("csharp") || langId.contains("dotnet")
+                || langId.contains("go") || langId.contains("dart")) {
             memoryKb = null;
+        }
+
+        // .NET CLR tiered JIT compiler uses ftruncate for internal memory-mapped code caches,
+        // which triggers SIGXFSZ (signal 25) when RLIMIT_FSIZE (--fsize) is enforced.
+        Long fileSizeKb = 10240L;
+        if (langId.contains("csharp") || langId.contains("dotnet")) {
+            fileSizeKb = null;
         }
 
         return new IsolateExecutionConstraints(
@@ -324,7 +352,7 @@ public class CodeExecutionServiceImpl implements CodeExecutionService {
                 wallTime,
                 memoryKb,
                 50,
-                10240L);
+                fileSizeKb);
     }
 
     private List<String> buildExecutionLogs(IsolateExecutionResult result) {

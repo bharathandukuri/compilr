@@ -59,7 +59,7 @@ export const StdinPanel: React.FC<StdinPanelProps> = ({
           onChange={(e) => onChange(e.target.value)}
           disabled={disabled}
           placeholder="Enter input to pass to program via standard input (one line per argument/input)..."
-          className="h-full w-full resize-none rounded-md bg-muted/20 p-2 font-mono text-xs focus:outline-hidden focus:ring-1 focus:ring-primary border border-border/50 text-foreground"
+          className="h-full w-full resize-none rounded-md bg-muted/20 p-2 font-mono text-xs focus:outline-hidden focus:ring-1 focus:ring-primary border border-border/50 text-foreground scrollbar-thin"
           spellCheck={false}
         />
       </div>

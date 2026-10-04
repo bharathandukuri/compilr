@@ -112,35 +112,47 @@ class EnvironmentExecutionQueueTest {
     @Test
     @DisplayName("Executes queued tasks in strict FIFO order")
     void executesInFifoOrder() throws Exception {
-        CountDownLatch blockLatch = new CountDownLatch(1);
-        List<Integer> executionOrder = Collections.synchronizedList(new ArrayList<>());
+        EnvironmentExecutionQueue singleWorkerQueue = new EnvironmentExecutionQueue(
+                "fifo-test-env",
+                1,
+                5,
+                5000L,
+                globalCapacityTracker
+        );
+        try {
+            CountDownLatch blockLatch = new CountDownLatch(1);
+            List<Integer> executionOrder = Collections.synchronizedList(new ArrayList<>());
 
-        // Saturation task
-        queue.submit(() -> {
-            blockLatch.await(3, TimeUnit.SECONDS);
-            return 0;
-        });
-        queue.submit(() -> {
-            blockLatch.await(3, TimeUnit.SECONDS);
-            return 0;
-        });
+            // Saturation task
+            singleWorkerQueue.submit(() -> {
+                blockLatch.await(3, TimeUnit.SECONDS);
+                return 0;
+            });
 
-        // Submit 2 queued tasks
-        CompletableFuture<Integer> f1 = queue.submit(() -> {
-            executionOrder.add(1);
-            return 1;
-        });
-        CompletableFuture<Integer> f2 = queue.submit(() -> {
-            executionOrder.add(2);
-            return 2;
-        });
+            // Submit queued tasks in order: 1, 2, 3
+            CompletableFuture<Integer> f1 = singleWorkerQueue.submit(() -> {
+                executionOrder.add(1);
+                return 1;
+            });
+            CompletableFuture<Integer> f2 = singleWorkerQueue.submit(() -> {
+                executionOrder.add(2);
+                return 2;
+            });
+            CompletableFuture<Integer> f3 = singleWorkerQueue.submit(() -> {
+                executionOrder.add(3);
+                return 3;
+            });
 
-        blockLatch.countDown();
+            blockLatch.countDown();
 
-        f1.get(2, TimeUnit.SECONDS);
-        f2.get(2, TimeUnit.SECONDS);
+            f1.get(2, TimeUnit.SECONDS);
+            f2.get(2, TimeUnit.SECONDS);
+            f3.get(2, TimeUnit.SECONDS);
 
-        assertThat(executionOrder).containsExactly(1, 2);
+            assertThat(executionOrder).containsExactly(1, 2, 3);
+        } finally {
+            singleWorkerQueue.shutdown();
+        }
     }
 
     @Test

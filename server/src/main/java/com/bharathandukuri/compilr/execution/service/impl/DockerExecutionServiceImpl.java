@@ -86,8 +86,10 @@ public class DockerExecutionServiceImpl implements DockerExecutionService {
             return;
         }
 
-        try {
-            for (DockerImageRegistry registry : DockerImageRegistry.values()) {
+        ensureSandboxNetworkExists();
+
+        for (DockerImageRegistry registry : DockerImageRegistry.values()) {
+            try {
                 DockerImageDetails image = registry.dockerImage();
 
                 if (isImageExists(image)) {
@@ -104,9 +106,9 @@ public class DockerExecutionServiceImpl implements DockerExecutionService {
                 );
 
                 createImage(image);
+            } catch (Exception e) {
+                log.warn("Could not prepare Docker image [{}]: {}. Continuing startup.", registry.name(), e.getMessage());
             }
-        } catch (Exception e) {
-            log.warn("Docker daemon image validation failed: {}. Continuing startup.", e.getMessage());
         }
     }
 
@@ -215,6 +217,30 @@ public class DockerExecutionServiceImpl implements DockerExecutionService {
         return createContainer(dockerImageDetails, null);
     }
 
+    public static final String SANDBOX_NETWORK_NAME = "compilr-sandbox-net";
+
+    private void ensureSandboxNetworkExists() {
+        try {
+            boolean exists = dockerClient.listNetworksCmd()
+                    .withNameFilter(SANDBOX_NETWORK_NAME)
+                    .exec()
+                    .stream()
+                    .anyMatch(n -> SANDBOX_NETWORK_NAME.equals(n.getName()));
+
+            if (!exists) {
+                dockerClient.createNetworkCmd()
+                        .withName(SANDBOX_NETWORK_NAME)
+                        .withDriver("bridge")
+                        .withInternal(true)
+                        .withCheckDuplicate(true)
+                        .exec();
+                log.info("Created isolated internal Docker network [{}] for execution sandboxes.", SANDBOX_NETWORK_NAME);
+            }
+        } catch (Exception e) {
+            log.warn("Could not ensure sandbox network [{}] exists: {}", SANDBOX_NETWORK_NAME, e.getMessage());
+        }
+    }
+
     @Override
     public DockerContainerDetails createContainer(
             DockerImageDetails dockerImageDetails,
@@ -255,11 +281,18 @@ public class DockerExecutionServiceImpl implements DockerExecutionService {
                 if (constraints.pidsLimit() > 0) {
                     hostConfig.withPidsLimit(constraints.pidsLimit());
                 }
+            }
 
-                if (constraints.networkDisabled()) {
-                    networkDisabled = true;
-                    hostConfig.withNetworkMode("none");
-                }
+            // Sandbox containers must NEVER use the default bridge network.
+            // By default, network is completely disabled (mode: "none").
+            // If network access is explicitly enabled, attach to the internal sandbox network
+            // so execution containers can never access host exposed ports or external infrastructure.
+            if (constraints == null || constraints.networkDisabled()) {
+                networkDisabled = true;
+                hostConfig.withNetworkMode("none");
+            } else {
+                ensureSandboxNetworkExists();
+                hostConfig.withNetworkMode(SANDBOX_NETWORK_NAME);
             }
 
             CreateContainerCmd createCmd = dockerClient

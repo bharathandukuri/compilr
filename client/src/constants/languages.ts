@@ -192,26 +192,6 @@ int main() {
 `,
   },
   {
-    id: "typescript-node",
-    name: "TypeScript (Node.js)",
-    shortName: "TypeScript",
-    version: "5.4",
-    type: "INTERPRETED",
-    fileExtension: ".ts",
-    fileName: "main.ts",
-    monacoLanguage: "typescript",
-    compiled: false,
-    popular: false,
-    tag: "TS 5.4",
-    color: "#3178C6",
-    bgLight: "bg-blue-600/10",
-    borderColor: "border-blue-600/30",
-    aliases: ["typescript", "ts"],
-    defaultStarterCode: `const greeting: string = "Hello, World!";
-console.log(greeting);
-`,
-  },
-  {
     id: "sqlite-3",
     name: "SQLite (3.45)",
     shortName: "SQLite",
@@ -227,7 +207,236 @@ console.log(greeting);
     bgLight: "bg-sky-600/10",
     borderColor: "border-sky-600/30",
     aliases: ["sqlite", "sqlite3"],
-    defaultStarterCode: `SELECT 'Hello, World!' AS message;
+    defaultStarterCode: `CREATE TABLE users (id INTEGER PRIMARY KEY, name TEXT);
+INSERT INTO users (name) VALUES ('Alice'), ('Bob');
+SELECT * FROM users;
+`,
+  },
+  {
+    id: "mongodb-8.0",
+    name: "MongoDB (8.0)",
+    shortName: "MongoDB",
+    version: "8.0",
+    type: "DATABASE",
+    fileExtension: ".js",
+    fileName: "main.js",
+    monacoLanguage: "javascript",
+    compiled: false,
+    popular: false,
+    tag: "v8.0",
+    color: "#47A248",
+    bgLight: "bg-emerald-500/10",
+    borderColor: "border-emerald-500/30",
+    aliases: ["mongodb", "mongo", "nosql"],
+    defaultStarterCode: `db.users.insertOne({ name: "Alice", role: "Developer" });
+db.users.insertOne({ name: "Bob", role: "Designer" });
+
+printjson(db.users.find().toArray());
+`,
+  },
+  {
+    id: "typescript-5.4",
+    name: "TypeScript (5.4)",
+    shortName: "TypeScript",
+    version: "5.4",
+    type: "INTERPRETED",
+    fileExtension: ".ts",
+    fileName: "main.ts",
+    monacoLanguage: "typescript",
+    compiled: false,
+    popular: true,
+    tag: "TS 5.4",
+    color: "#3178C6",
+    bgLight: "bg-blue-600/10",
+    borderColor: "border-blue-600/30",
+    aliases: ["typescript", "ts"],
+    defaultStarterCode: `const greeting: string = "Hello, World!";
+console.log(greeting);
+`,
+  },
+  {
+    id: "go-1.22",
+    name: "Go (1.22)",
+    shortName: "Go",
+    version: "1.22",
+    type: "COMPILED",
+    fileExtension: ".go",
+    fileName: "main.go",
+    monacoLanguage: "go",
+    compiled: true,
+    popular: true,
+    tag: "1.22",
+    color: "#00ADD8",
+    bgLight: "bg-cyan-500/10",
+    borderColor: "border-cyan-500/30",
+    aliases: ["go", "golang"],
+    defaultStarterCode: `package main
+
+import (
+	"bufio"
+	"fmt"
+	"os"
+	"strings"
+)
+
+func main() {
+	reader := bufio.NewReader(os.Stdin)
+	text, err := reader.ReadString('\\n')
+	text = strings.TrimSpace(text)
+	if err == nil && len(text) > 0 {
+		fmt.Printf("Hello, %s!\\n", text)
+	} else {
+		fmt.Println("Hello, World!")
+	}
+}
+`,
+  },
+  {
+    id: "rust-1.75",
+    name: "Rust (1.75)",
+    shortName: "Rust",
+    version: "1.75",
+    type: "COMPILED",
+    fileExtension: ".rs",
+    fileName: "main.rs",
+    monacoLanguage: "rust",
+    compiled: true,
+    popular: true,
+    tag: "1.75",
+    color: "#DEA584",
+    bgLight: "bg-amber-600/10",
+    borderColor: "border-amber-600/30",
+    aliases: ["rust", "rs"],
+    defaultStarterCode: `use std::io::{self, BufRead};
+
+fn main() {
+    let stdin = io::stdin();
+    let mut iterator = stdin.lock().lines();
+    if let Some(Ok(line)) = iterator.next() {
+        if !line.trim().is_empty() {
+            println!("Hello, {}!", line.trim());
+            return;
+        }
+    }
+    println!("Hello, World!");
+}
+`,
+  },
+  {
+    id: "csharp-12",
+    name: "C# (.NET 8.0)",
+    shortName: "C#",
+    version: ".NET 8.0",
+    type: "COMPILED",
+    fileExtension: ".cs",
+    fileName: "Program.cs",
+    monacoLanguage: "csharp",
+    compiled: true,
+    popular: true,
+    tag: ".NET 8",
+    color: "#512BD4",
+    bgLight: "bg-purple-500/10",
+    borderColor: "border-purple-500/30",
+    aliases: ["csharp", "c#", "cs", "dotnet"],
+    defaultStarterCode: `using System;
+
+public class Program
+{
+    public static void Main(string[] args)
+    {
+        string? line = Console.ReadLine();
+        if (!string.IsNullOrEmpty(line))
+        {
+            Console.WriteLine($"Hello, {line}!");
+        }
+        else
+        {
+            Console.WriteLine("Hello, World!");
+        }
+    }
+}
+`,
+  },
+  {
+    id: "kotlin-1.9",
+    name: "Kotlin (1.9)",
+    shortName: "Kotlin",
+    version: "1.9",
+    type: "COMPILED",
+    fileExtension: ".kt",
+    fileName: "Main.kt",
+    monacoLanguage: "kotlin",
+    compiled: true,
+    popular: false,
+    tag: "v1.9",
+    color: "#7F52FF",
+    bgLight: "bg-indigo-500/10",
+    borderColor: "border-indigo-500/30",
+    aliases: ["kotlin", "kt"],
+    defaultStarterCode: `import java.util.Scanner
+
+fun main() {
+    val scanner = Scanner(System.\`in\`)
+    if (scanner.hasNextLine()) {
+        val line = scanner.nextLine()
+        println("Hello, $line!")
+    } else {
+        println("Hello, World!")
+    }
+}
+`,
+  },
+  {
+    id: "dart-3.4",
+    name: "Dart (3.4)",
+    shortName: "Dart",
+    version: "3.4",
+    type: "INTERPRETED",
+    fileExtension: ".dart",
+    fileName: "main.dart",
+    monacoLanguage: "dart",
+    compiled: false,
+    popular: false,
+    tag: "3.4",
+    color: "#0175C2",
+    bgLight: "bg-sky-500/10",
+    borderColor: "border-sky-500/30",
+    aliases: ["dart"],
+    defaultStarterCode: `import 'dart:io';
+
+void main() {
+  String? line = stdin.readLineSync();
+  if (line != null && line.trim().isNotEmpty) {
+    print('Hello, \${line.trim()}!');
+  } else {
+    print('Hello, World!');
+  }
+}
+`,
+  },
+  {
+    id: "php-8.3",
+    name: "PHP (8.3)",
+    shortName: "PHP",
+    version: "8.3",
+    type: "INTERPRETED",
+    fileExtension: ".php",
+    fileName: "main.php",
+    monacoLanguage: "php",
+    compiled: false,
+    popular: false,
+    tag: "8.3",
+    color: "#777BB4",
+    bgLight: "bg-purple-600/10",
+    borderColor: "border-purple-600/30",
+    aliases: ["php"],
+    defaultStarterCode: `<?php
+$line = trim(fgets(STDIN));
+if (!empty($line)) {
+    echo "Hello, " . $line . "!\n";
+} else {
+    echo "Hello, World!\n";
+}
 `,
   },
 ]
@@ -248,6 +457,7 @@ export function getLanguageMeta(
   if (found) return found
 
   // Fallback for custom or unknown backend languages
+  const isMongo = id.toLowerCase().includes("mongo")
   return {
     id: typeof langOrId === "object" && langOrId ? langOrId.id : id,
     name: typeof langOrId === "object" && langOrId ? langOrId.name : id,
@@ -261,17 +471,21 @@ export function getLanguageMeta(
     fileExtension:
       typeof langOrId === "object" && langOrId
         ? langOrId.fileExtension
+        : isMongo
+        ? ".js"
         : ".txt",
     fileName:
       typeof langOrId === "object" && langOrId
         ? `main${langOrId.fileExtension}`
+        : isMongo
+        ? "main.js"
         : "main.txt",
-    monacoLanguage: "plaintext",
+    monacoLanguage: isMongo ? "javascript" : "plaintext",
     compiled: false,
     tag: "",
-    color: "#64748B",
-    bgLight: "bg-muted/40",
-    borderColor: "border-border",
+    color: isMongo ? "#47A248" : "#64748B",
+    bgLight: isMongo ? "bg-emerald-500/10" : "bg-muted/40",
+    borderColor: isMongo ? "border-emerald-500/30" : "border-border",
     aliases: [],
     defaultStarterCode:
       typeof langOrId === "object" && langOrId

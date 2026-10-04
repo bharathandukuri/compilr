@@ -50,6 +50,60 @@ public enum DockerImageRegistry {
             "execution/postgres",
             "16",
             "docker/postgres-16"
+    ),
+
+    TYPESCRIPT_5_4(
+            "execution/typescript",
+            "5.4",
+            "docker/typescript-5_4"
+    ),
+
+    GO_1_22(
+            "execution/go",
+            "1.22",
+            "docker/go-1_22"
+    ),
+
+    RUST_1_75(
+            "execution/rust",
+            "1.75",
+            "docker/rust-1_75"
+    ),
+
+    PHP_8_3(
+            "execution/php",
+            "8.3",
+            "docker/php-8_3"
+    ),
+
+    CSHARP_12(
+            "execution/csharp",
+            "12",
+            "docker/csharp-12"
+    ),
+
+    KOTLIN_1_9(
+            "execution/kotlin",
+            "1.9",
+            "docker/kotlin-1_9"
+    ),
+
+    DART_3_4(
+            "execution/dart",
+            "3.4",
+            "docker/dart-3_4"
+    ),
+
+    SQLITE_3(
+            "execution/sqlite",
+            "3",
+            "docker/sqlite-3"
+    ),
+
+    MONGODB_8_0(
+            "execution/mongodb",
+            "8.0",
+            "docker/mongodb-8_0"
     );
 
     private final String name;

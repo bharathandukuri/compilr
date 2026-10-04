@@ -11,7 +11,7 @@ public record DatabaseContainerConstraints(
     public static DatabaseContainerConstraints defaults() {
         return new DatabaseContainerConstraints(
                 1L,
-                262144L,
+                524288L,
                 100L,
                 true);
     }

@@ -63,7 +63,7 @@ export const Header: React.FC<HeaderProps> = ({
   const currentMeta = getLanguageMeta(selectedLanguage)
 
   return (
-    <header className="flex h-12 items-center justify-between border-b bg-card px-3 sm:px-4 shrink-0 select-none">
+    <header className="relative flex h-12 items-center justify-between border-b bg-card px-3 sm:px-4 shrink-0 select-none">
       {/* Left: Branding & Language Selector */}
       <div className="flex items-center gap-3">
         {/* Brand / Home link via TanStack Router */}
@@ -142,7 +142,39 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
       </div>
 
-      {/* Right: Actions (Reset, Settings, Theme, Run) */}
+      {/* Center: Run Execution Button */}
+      <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+        <Tooltip>
+          <TooltipTrigger
+            render={
+              <Button
+                onClick={onRun}
+                disabled={isRunning || !selectedLanguage}
+                size="sm"
+                className="h-8 px-4 gap-1.5 font-semibold text-xs bg-emerald-600 hover:bg-emerald-500 text-white shadow-2xs cursor-pointer transition-all hover:scale-105 active:scale-95"
+              >
+                {isRunning ? (
+                  <>
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    <span>Running...</span>
+                  </>
+                ) : (
+                  <>
+                    <Play className="h-3 w-3 fill-current" />
+                    <span>Run</span>
+                    <kbd className="hidden sm:inline-block ml-1 rounded bg-black/20 px-1 py-0.5 text-[10px] font-mono text-white/90">
+                      ⌘↵
+                    </kbd>
+                  </>
+                )}
+              </Button>
+            }
+          />
+          <TooltipContent>Run code (⌘+Enter / Ctrl+Enter)</TooltipContent>
+        </Tooltip>
+      </div>
+
+      {/* Right: Actions (Reset, Settings, Theme) */}
       <div className="flex items-center gap-1.5 sm:gap-2">
         {/* Reset Code Button */}
         <Tooltip>
@@ -274,36 +306,6 @@ export const Header: React.FC<HeaderProps> = ({
           <TooltipContent>
             Switch to {theme === "dark" ? "light" : "dark"} mode
           </TooltipContent>
-        </Tooltip>
-
-        {/* Run Button */}
-        <Tooltip>
-          <TooltipTrigger
-            render={
-              <Button
-                onClick={onRun}
-                disabled={isRunning || !selectedLanguage}
-                size="sm"
-                className="h-8 px-3.5 gap-1.5 font-semibold text-xs bg-emerald-600 hover:bg-emerald-500 text-white shadow-2xs cursor-pointer"
-              >
-                {isRunning ? (
-                  <>
-                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                    <span>Running...</span>
-                  </>
-                ) : (
-                  <>
-                    <Play className="h-3 w-3 fill-current" />
-                    <span>Run</span>
-                    <kbd className="hidden md:inline-block ml-0.5 rounded bg-black/20 px-1 text-[10px] font-mono text-white/90">
-                      ⌘↵
-                    </kbd>
-                  </>
-                )}
-              </Button>
-            }
-          />
-          <TooltipContent>Run code (⌘+Enter / Ctrl+Enter)</TooltipContent>
         </Tooltip>
       </div>
     </header>

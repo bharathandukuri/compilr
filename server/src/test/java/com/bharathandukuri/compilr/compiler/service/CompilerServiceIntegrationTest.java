@@ -180,4 +180,40 @@ class CompilerServiceIntegrationTest {
 
         assertThat(r1.executionId()).isNotEqualTo(r2.executionId());
     }
+
+    @Test
+    @DisplayName("PostgreSQL 16: executes SQL query successfully")
+    void execute_postgresSuccess() {
+        ExecuteRequest request = new ExecuteRequest(
+                "postgresql-16",
+                "SELECT 42 AS answer;",
+                "",
+                new CompilerOptionsDto(10000L, 524288L)
+        );
+
+        ExecuteResponse response = compilerService.execute(request);
+
+        assertThat(response).isNotNull();
+        assertThat(response.status()).isEqualTo(ExecutionStatus.SUCCESS);
+        assertThat(response.stdout()).contains("42");
+        assertThat(response.exitCode()).isEqualTo(0L);
+    }
+
+    @Test
+    @DisplayName("MySQL 8.0: executes SQL query successfully")
+    void execute_mysqlSuccess() {
+        ExecuteRequest request = new ExecuteRequest(
+                "mysql-8.0",
+                "SELECT 99 AS result;",
+                "",
+                new CompilerOptionsDto(10000L, 524288L)
+        );
+
+        ExecuteResponse response = compilerService.execute(request);
+
+        assertThat(response).isNotNull();
+        assertThat(response.status()).isEqualTo(ExecutionStatus.SUCCESS);
+        assertThat(response.stdout()).contains("99");
+        assertThat(response.exitCode()).isEqualTo(0L);
+    }
 }
