@@ -7,7 +7,7 @@ WORKDIR /app
 
 # Copy package descriptors first to leverage caching
 COPY package.json package-lock.json ./
-RUN npm ci
+RUN npm ci --no-audit && npm cache clean --force
 
 # Copy source and build static bundle
 COPY . .
