@@ -43,14 +43,18 @@ services:
     networks:
       - compilr-app-net
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:8080/api/v1/compiler/health || exit 1"]
+      test:
+        [
+          "CMD-SHELL",
+          "curl -f http://localhost:8080/api/v1/compiler/health || exit 1",
+        ]
       interval: 15s
       timeout: 5s
       retries: 3
       start_period: 30s
 
   redis:
-    image: redis:7-alpine
+    image: redis:8-alpine
     container_name: compilr-redis
     ports:
       - "${REDIS_PORT:-6992}:6379"
@@ -66,7 +70,14 @@ services:
     networks:
       - compilr-app-net
     healthcheck:
-      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD:-stacked_redis_secret}", "ping"]
+      test:
+        [
+          "CMD",
+          "redis-cli",
+          "-a",
+          "${REDIS_PASSWORD:-stacked_redis_secret}",
+          "ping",
+        ]
       interval: 10s
       timeout: 5s
       retries: 3
