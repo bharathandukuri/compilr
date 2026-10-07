@@ -19,19 +19,27 @@ All operational automation scripts are located in the [`scripts/`](../scripts) d
 ## Detailed Usage Examples
 
 ### 1. `scripts/build-execution-images.sh`
-Builds all 14 execution sandbox images (Isolate 1.0, Java 21, Kotlin 1.9, Node.js 20, TypeScript 5.4, Python 3.12, C 17, C++ 23, Go 1.22, Rust 1.75, PostgreSQL 16, MySQL 8.0, SQLite 3, MongoDB 8.0):
+Builds the 14 execution sandbox images in topological order with smart caching (skips existing images automatically):
 ```bash
+# Fast verify / build missing images only (0.1s if cached):
 ./scripts/build-execution-images.sh
+
+# Force rebuild all images without cache:
+./scripts/build-execution-images.sh --force
+
+# Build only a specific language (e.g. Python or Go):
+./scripts/build-execution-images.sh python
+./scripts/build-execution-images.sh go-1_22
 ```
 
 ### 2. `scripts/deploy.sh`
-Checks host prerequisites, creates the isolated internal network `compilr-sandbox-net`, builds execution images, builds server and client containers, and launches services in the background:
+Checks host prerequisites, creates the isolated internal network `compilr-sandbox-net`, verifies/builds execution images, builds server and client containers, and launches services in the background:
 ```bash
 ./scripts/deploy.sh
 ```
 
 ### 3. `scripts/run-dind.sh`
-Starts the All-In-One DinD container.
+Starts the All-In-One DinD container with host volume caching for images and data.
 ```bash
 # Run on default port 6990 using local compilr:latest image:
 ./scripts/run-dind.sh
@@ -41,11 +49,17 @@ Starts the All-In-One DinD container.
 
 # Run a specific Docker Hub image on port 6990:
 ./scripts/run-dind.sh 6990 myuser/compilr:latest
+
+# Reset and wipe cached volume for a fresh clean start:
+./scripts/run-dind.sh 6990 compilr:latest --clean
 ```
 
 ### 4. `scripts/publish-dockerhub.sh`
-Builds and pushes the DinD image to your public Docker Hub repository:
+Builds and pushes the DinD image to your public Docker Hub repository with BuildKit layer caching and optional sandbox pre-caching:
 ```bash
-# Syntax: ./scripts/publish-dockerhub.sh <username>/<repo> [tag]
+# Syntax: ./scripts/publish-dockerhub.sh <username>/<repo> [tag] [--embed-cache]
 ./scripts/publish-dockerhub.sh bharathandukuri/compilr latest
+
+# Publish self-contained image with pre-baked execution sandbox archives:
+./scripts/publish-dockerhub.sh bharathandukuri/compilr latest --embed-cache
 ```

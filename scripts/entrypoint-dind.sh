@@ -3,10 +3,15 @@
 # Compilr All-In-One (DinD) Entrypoint Script
 #
 # Starts internal Docker daemon (dockerd), ensures required networks exist,
-# builds execution sandbox images, and runs the Docker Compose stack.
+# loads pre-cached image archives, verifies sandbox images, and runs Compose stack.
 # ==============================================================================
 
 set -euo pipefail
+
+# Force Docker CLI in this container to use the internal Unix socket
+export DOCKER_HOST="unix:///var/run/docker.sock"
+export DOCKER_TLS_CERTDIR=""
+export DOCKER_BUILDKIT=1
 
 # Graceful termination handler
 cleanup() {
@@ -34,7 +39,7 @@ echo "======================================================================"
 # 1. Start internal dockerd
 echo "==> Starting internal Docker daemon (dockerd)..."
 find /run /var/run -iname 'docker*.pid' -delete 2>/dev/null || true
-dockerd >/var/log/dockerd.log 2>&1 &
+dockerd --storage-driver=overlayfs >/var/log/dockerd.log 2>&1 &
 DOCKERD_PID=$!
 
 # 2. Wait for dockerd to be ready
@@ -52,27 +57,40 @@ while ! docker info >/dev/null 2>&1; do
 done
 echo "==> Internal Docker daemon is ready."
 
-# 3. Create isolated internal execution network for backend sandboxes
+# 3. Load pre-cached image archives (if embedded into image or mounted)
+CACHE_DIRS=("/var/cache/docker-images" "/docker-cache" "/app/cache/images")
+for CDIR in "${CACHE_DIRS[@]}"; do
+    if [ -d "$CDIR" ]; then
+        for ARCHIVE in "$CDIR"/*.tar "$CDIR"/*.tar.gz; do
+            if [ -f "$ARCHIVE" ]; then
+                echo "==> Loading pre-cached Docker image: ${ARCHIVE}..."
+                docker load -i "$ARCHIVE" 2>/dev/null || true
+            fi
+        done
+    fi
+done
+
+# 4. Create isolated internal execution network for backend sandboxes
 echo "==> Ensuring isolated sandbox network 'compilr-sandbox-net' exists..."
 if ! docker network inspect compilr-sandbox-net >/dev/null 2>&1; then
     docker network create --internal --driver bridge compilr-sandbox-net
     echo "Created internal Docker network: compilr-sandbox-net"
 fi
 
-# 4. Prepare .env if not present
+# 5. Prepare .env if not present
 if [ ! -f .env ] && [ -f .env.example ]; then
     cp .env.example .env
 fi
 
-# 5. Build sandbox execution images (if enabled)
+# 6. Verify or build sandbox execution images
 if [ "${BUILD_EXECUTION_IMAGES:-true}" = "true" ]; then
-    echo "==> Preparing execution sandbox images..."
+    echo "==> Verifying execution sandbox images..."
     if [ -f "scripts/build-execution-images.sh" ]; then
         bash "scripts/build-execution-images.sh"
     fi
 fi
 
-# 6. Launch Docker Compose stack
+# 7. Launch Docker Compose stack
 echo ""
 echo "======================================================================"
 echo "Compilr Services Starting (Client UI on Port ${CLIENT_PORT:-6990})"
@@ -81,8 +99,12 @@ echo ""
 
 if [ "$#" -gt 0 ]; then
     exec "$@"
-else
+elif [ "${FORCE_REBUILD:-false}" = "true" ]; then
     docker compose up --build &
+    COMPOSE_PID=$!
+    wait "$COMPOSE_PID"
+else
+    docker compose up &
     COMPOSE_PID=$!
     wait "$COMPOSE_PID"
 fi

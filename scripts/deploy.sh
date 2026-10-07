@@ -41,9 +41,9 @@ else
     echo "Isolated sandbox network 'compilr-sandbox-net' already exists."
 fi
 
-# 4. Build all 17 sandbox execution images
+# 4. Build all 14 sandbox execution images (skips cached images automatically)
 echo ""
-echo "Building execution sandbox images..."
+echo "Verifying execution sandbox images..."
 bash "${SCRIPT_DIR}/build-execution-images.sh"
 
 # 5. Build and launch Docker Compose services

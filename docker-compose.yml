@@ -26,7 +26,7 @@ services:
       - SERVER_PORT=8080
       - SPRING_DATA_REDIS_HOST=redis
       - SPRING_DATA_REDIS_PORT=6379
-      - SPRING_DATA_REDIS_PASSWORD=stacked_redis_secret
+      - SPRING_DATA_REDIS_PASSWORD=${REDIS_PASSWORD:-stacked_redis_secret}
       - COMPILR_EXECUTION_DOCKER_HOST=unix:///var/run/docker.sock
       - COMPILR_EXECUTION_DOCKER_ENABLED=true
       - DEFAULT_TIMEOUT_MS=${DEFAULT_TIMEOUT_MS:-5000}
@@ -69,7 +69,7 @@ services:
       - "${REDIS_PORT:-6992}:6379"
     command: >
       redis-server
-      --requirepass stacked_redis_secret
+      --requirepass ${REDIS_PASSWORD:-stacked_redis_secret}
       --appendonly yes
       --maxmemory 256mb
       --maxmemory-policy noeviction
@@ -78,6 +78,7 @@ services:
     restart: unless-stopped
     networks:
       - compilr-app-net
+    healthcheck:
       test:
         [
           "CMD",

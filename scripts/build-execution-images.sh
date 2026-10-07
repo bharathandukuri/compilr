@@ -1,12 +1,13 @@
 #!/usr/bin/env bash
 # ==============================================================================
-# Compilr - Build All Execution Sandbox Images
+# Compilr - Build Execution Sandbox Docker Images
 #
 # Builds the 14 Docker images required by the Compilr execution engine.
-# Images are built in strict topological dependency order:
-#   1. execution/isolate:1.0 is built first (base sandbox).
-#   2. execution/java:21 is built before execution/kotlin:1.9.
-#   3. execution/javascript:node-20 is built before execution/typescript:5.4.
+# Features:
+#   • Smart caching: Skips already-built images by default (instant startup).
+#   • Topological order: Base images built before dependent images.
+#   • Selective builds: Pass a language filter (e.g., './scripts/build-execution-images.sh python')
+#   • Force rebuild: Pass '--force' or '-f' or set 'FORCE_REBUILD=true'.
 # ==============================================================================
 
 set -euo pipefail
@@ -17,10 +18,28 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
 DOCKER_DIR="${ROOT_DIR}/server/src/main/resources/docker"
 
+# Parse CLI arguments
+FORCE="${FORCE_REBUILD:-false}"
+FILTER=""
+
+for ARG in "$@"; do
+    case "$ARG" in
+        --force|-f)
+            FORCE="true"
+            ;;
+        *)
+            FILTER="$ARG"
+            ;;
+    esac
+done
+
 echo "======================================================================"
 echo "Compilr: Building Execution Sandbox Docker Images"
-echo "Root directory: ${ROOT_DIR}"
-echo "Docker contexts: ${DOCKER_DIR}"
+echo "  • Docker contexts: ${DOCKER_DIR}"
+echo "  • Force rebuild:   ${FORCE}"
+if [ -n "${FILTER}" ]; then
+    echo "  • Filter:          ${FILTER}"
+fi
 echo "======================================================================"
 
 # Strict topological build order ensuring base images exist before child images
@@ -43,18 +62,42 @@ BUILD_ORDER=(
 
 TOTAL=${#BUILD_ORDER[@]}
 INDEX=1
+SKIPPED_COUNT=0
+BUILT_COUNT=0
 
 for ENTRY in "${BUILD_ORDER[@]}"; do
     TAG="${ENTRY%%|*}"
     SUBDIR="${ENTRY##*|}"
-    echo ""
-    echo "[${INDEX}/${TOTAL}] Building ${TAG} from ${SUBDIR}..."
-    docker build -t "${TAG}" "${DOCKER_DIR}/${SUBDIR}"
+
+    # If a filter is provided, skip non-matching entries
+    if [ -n "${FILTER}" ]; then
+        if [[ "${TAG}" != *"${FILTER}"* ]] && [[ "${SUBDIR}" != *"${FILTER}"* ]]; then
+            INDEX=$((INDEX + 1))
+            continue
+        fi
+    fi
+
+    # Check if image already exists in local Docker daemon
+    if docker image inspect "${TAG}" >/dev/null 2>&1 && [ "${FORCE}" != "true" ]; then
+        echo "[${INDEX}/${TOTAL}] [CACHED] ${TAG} already exists (use --force to rebuild)"
+        SKIPPED_COUNT=$((SKIPPED_COUNT + 1))
+    else
+        echo ""
+        echo "[${INDEX}/${TOTAL}] [BUILDING] ${TAG} from ${SUBDIR}..."
+        BUILD_FLAGS=()
+        if [ "${FORCE}" = "true" ]; then
+            BUILD_FLAGS+=(--no-cache)
+        fi
+        docker build "${BUILD_FLAGS[@]}" -t "${TAG}" "${DOCKER_DIR}/${SUBDIR}"
+        BUILT_COUNT=$((BUILT_COUNT + 1))
+    fi
+
     INDEX=$((INDEX + 1))
 done
 
 echo ""
 echo "======================================================================"
-echo "All 17 Compilr execution images built successfully!"
-echo "Verify with: docker images 'execution/*'"
+echo "Execution Images Status:"
+echo "  • Built:   ${BUILT_COUNT}"
+echo "  • Cached:  ${SKIPPED_COUNT}"
 echo "======================================================================"

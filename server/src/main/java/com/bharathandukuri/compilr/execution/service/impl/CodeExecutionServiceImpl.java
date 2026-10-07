@@ -268,7 +268,7 @@ public class CodeExecutionServiceImpl implements CodeExecutionService {
             return;
         }
 
-        long deadline = System.currentTimeMillis() + 15000L;
+        long deadline = System.currentTimeMillis() + 30000L;
         while (System.currentTimeMillis() < deadline) {
             if (!dockerExecutionService.isContainerRunning(containerId)) {
                 String containerLogs = dockerExecutionService.getContainerLogs(containerId, 50);
@@ -292,8 +292,10 @@ public class CodeExecutionServiceImpl implements CodeExecutionService {
                 break;
             }
         }
-        log.warn("Database container [{}] did not become ready within timeout for language [{}]", containerId,
+        log.error("Database container [{}] did not become ready within timeout for language [{}]", containerId,
                 language != null ? language.id() : "unknown");
+        throw new DockerExecutionException("Database container [" + containerId + "] did not become ready within timeout for language ["
+                + (language != null ? language.id() : "unknown") + "]");
     }
 
     private static @NonNull List<String> getBashCompileCmd(CompiledLanguage language, String fileName, String boxDir) {

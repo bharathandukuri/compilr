@@ -8,3 +8,7 @@ server/target
 .DS_Store
 .idea
 .vscode
+.agents
+.gemini
+.system_generated
+*.tmp
