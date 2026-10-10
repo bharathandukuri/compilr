@@ -6,18 +6,17 @@
 #   ./scripts/run-dind.sh [port] [image-name] [--clean]
 #
 # Examples:
-#   ./scripts/run-dind.sh                     # Runs on default port 6990
-#   ./scripts/run-dind.sh 80                  # Runs on port 80
-#   ./scripts/run-dind.sh 6990 myuser/compilr # Runs custom image on port 6990
+#   ./scripts/run-dind.sh                             # Runs local compilr:latest on port 6990
+#   ./scripts/run-dind.sh 80                          # Runs on port 80
 #   ./scripts/run-dind.sh 6990 compilr:latest --clean # Cleans cached volume and restarts
 # ==============================================================================
 
 set -euo pipefail
 
 PORT="6990"
-IMAGE="compilr:latest"
 CONTAINER_NAME="compilr"
 CLEAN_CACHE="false"
+IMAGE="${IMAGE_NAME:-compilr:latest}"
 
 # Parse arguments
 for ARG in "$@"; do

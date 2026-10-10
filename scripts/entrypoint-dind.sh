@@ -39,7 +39,11 @@ echo "======================================================================"
 # 1. Start internal dockerd
 echo "==> Starting internal Docker daemon (dockerd)..."
 find /run /var/run -iname 'docker*.pid' -delete 2>/dev/null || true
-dockerd --storage-driver=overlayfs >/var/log/dockerd.log 2>&1 &
+if [ -x "/usr/local/bin/dockerd-entrypoint.sh" ]; then
+    /usr/local/bin/dockerd-entrypoint.sh dockerd >/var/log/dockerd.log 2>&1 &
+else
+    dockerd >/var/log/dockerd.log 2>&1 &
+fi
 DOCKERD_PID=$!
 
 # 2. Wait for dockerd to be ready

@@ -15,8 +15,8 @@ Compilr provides untrusted code execution within ephemeral, resource-constrained
 ## Documentation Quick Links
 
 * 📖 **[Configuration Guide (`docs/CONFIGURATION.md`)](docs/CONFIGURATION.md)** — Environment variables, resource limits, timeouts, abuse protection.
-* 🚀 **[Deployment Guide (`docs/DEPLOYMENT.md`)](docs/DEPLOYMENT.md)** — How to deploy with DinD (All-In-One single container), standard Docker Compose, or Docker Hub.
-* 🛠️ **[Scripts Guide (`docs/SCRIPTS.md`)](docs/SCRIPTS.md)** — Automation scripts for building execution images, deploying, and publishing.
+* 🚀 **[Deployment Guide (`docs/DEPLOYMENT.md`)](docs/DEPLOYMENT.md)** — How to deploy with DinD (All-In-One single container) or standard Docker Compose.
+* 🛠️ **[Scripts Guide (`docs/SCRIPTS.md`)](docs/SCRIPTS.md)** — Automation scripts for building execution images and deploying.
 
 ---
 
@@ -163,10 +163,9 @@ compilr/
 │   ├── DEPLOYMENT.md               # Deployment guide (DinD & Standard Compose)
 │   └── SCRIPTS.md                  # Script reference & automation usage
 ├── scripts/                        # Utility & deployment scripts
-│   ├── build-execution-images.sh   # Builds 17 language sandbox images
+│   ├── build-execution-images.sh   # Builds 14 language sandbox images
 │   ├── deploy.sh                   # Standard host deployment script
 │   ├── run-dind.sh                 # Quick DinD runner script
-│   ├── publish-dockerhub.sh        # Docker Hub publishing script
 │   └── entrypoint-dind.sh          # DinD container internal entrypoint
 ├── server/                         # Spring Boot 4 Backend (Java 25)
 └── client/                         # React 19 Frontend (TypeScript, Monaco, Vite)

@@ -8,7 +8,7 @@ Compilr supports two primary deployment patterns:
 
 ## Method 1: Deploy With DinD (All-In-One Container)
 
-**Best for**: Fast deployments, cloud VPS instances, zero host-socket exposure, and pre-packaged Docker Hub distribution.
+**Best for**: Fast deployments, cloud VPS instances, zero host-socket exposure, and self-contained execution.
 
 In this mode, everything runs inside a single privileged container:
 * Internal `dockerd` daemon manages sandbox containers and compose services.
@@ -83,35 +83,6 @@ docker compose up -d --build
 | **Client UI** | `6990` | `http://<server-ip>:6990` |
 | **Server API** | `6991` | `http://<server-ip>:6991` (Swagger: `http://<server-ip>:6991/swagger-ui.html`) |
 | **Redis** | `6992` | `localhost:6992` |
-
----
-
-## Method 3: Publish to Docker Hub & Public Distribution
-
-You can publish the all-in-one image to Docker Hub so anyone can run your instance with a single command.
-
-### 1. Log in to Docker Hub
-```bash
-docker login
-```
-
-### 2. Publish using the helper script
-Replace `<your-dockerhub-username>` with your Docker Hub handle:
-```bash
-./scripts/publish-dockerhub.sh <your-dockerhub-username>/compilr latest
-```
-
-### 3. Public Single-Command Run
-Once published, anyone in the world can run Compilr by executing:
-```bash
-docker run -d \
-  --name compilr \
-  --privileged \
-  -p 6990:6990 \
-  -v compilr-data:/var/lib/docker \
-  --restart unless-stopped \
-  <your-dockerhub-username>/compilr:latest
-```
 
 ---
 

@@ -12,3 +12,6 @@ server/target
 .gemini
 .system_generated
 *.tmp
+.docker-cache-temp
+*.tar
+*.tar.gz
