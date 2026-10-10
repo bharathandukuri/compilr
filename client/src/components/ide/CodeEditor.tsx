@@ -11,7 +11,7 @@ interface CodeEditorProps {
   language: Language | null
   code: string
   onChange: (value: string) => void
-  onRun: () => void
+  onRun: (overrideCode?: string) => void
 }
 
 export const CodeEditor: React.FC<CodeEditorProps> = ({
@@ -24,6 +24,15 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   const settings = useEditorSettings()
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null)
   const monacoRef = useRef<Monaco | null>(null)
+
+  // Stable callback refs to avoid stale closures in Monaco commands and listeners
+  const onRunRef = useRef(onRun)
+  const onChangeRef = useRef(onChange)
+
+  useEffect(() => {
+    onRunRef.current = onRun
+    onChangeRef.current = onChange
+  }, [onRun, onChange])
 
   const langMeta = getLanguageMeta(language)
 
@@ -95,7 +104,8 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
     editor.addCommand(
       monacoInstance.KeyMod.CtrlCmd | monacoInstance.KeyCode.Enter,
       () => {
-        onRun()
+        const latestCode = editor.getValue()
+        onRunRef.current(latestCode)
       }
     )
 
@@ -145,6 +155,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
 
   const isMongo = langMeta.id.includes("mongo") || langMeta.monacoLanguage === "mongodb"
   const editorLanguage = isMongo ? "javascript" : langMeta.monacoLanguage
+  const editorPath = `${language?.id || "default"}/${langMeta.fileName}`
 
   return (
     <div className="flex h-full w-full flex-col bg-background overflow-hidden">
@@ -161,11 +172,12 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
         <Editor
           height="100%"
           width="100%"
+          path={editorPath}
           language={editorLanguage}
           theme={isDark ? "vs-dark" : "light"}
           value={code}
           beforeMount={handleBeforeMount}
-          onChange={(val) => onChange(val || "")}
+          onChange={(val) => onChangeRef.current(val || "")}
           onMount={handleEditorMount}
           loading={
             <div className="flex h-full w-full items-center justify-center text-xs text-muted-foreground">
